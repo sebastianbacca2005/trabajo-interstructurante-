@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CulturaActiva Pasto</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: #ffffff;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #222222;
+        }
+
+        .contenedor {
+            width: 100%;
+            max-width: 430px;
+            margin: 0 auto;
+            padding: 25px 35px 35px;
+            text-align: center;
+        }
+
+        /* LOGO */
+
+        .logo {
+            display: block;
+            width: 260px;
+            height: 180px;
+            object-fit: contain;
+            margin: 0 auto;
+        }
+
+        /* NOMBRE */
+
+        .nombre {
+            margin-top: 0;
+            font-size: 36px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .cultura {
+            color: #28105f;
+        }
+
+        .activa {
+            color: #f04b16;
+        }
+
+        /* PASTO */
+
+        .pasto {
+            margin-top: 8px;
+            padding-left: 13px;
+            color: #28105f;
+            font-size: 17px;
+            font-weight: bold;
+            letter-spacing: 13px;
+        }
+
+        /* DESCRIPCIÓN */
+
+        .descripcion {
+            margin-top: 14px;
+            margin-bottom: 55px;
+            font-size: 15px;
+            color: #222222;
+        }
+
+        /* FORMULARIO */
+
+        .campo {
+            width: 100%;
+            text-align: left;
+            margin-bottom: 18px;
+        }
+
+        .campo label {
+            display: block;
+            margin-left: 8px;
+            margin-bottom: 8px;
+            font-size: 17px;
+            color: #222222;
+        }
+
+        .campo input {
+            width: 100%;
+            height: 30px;
+            padding: 5px 8px;
+            border: 1px solid #777777;
+            border-radius: 0;
+            background: #dddddd;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .campo input:focus {
+            border: 2px solid #563b94;
+            background: #ffffff;
+        }
+
+        /* BOTÓN LOGIN */
+
+        .btn-login {
+            display: block;
+            width: 177px;
+            height: 40px;
+            margin: 18px auto 0;
+            border: none;
+            border-radius: 0;
+            background: #563b94;
+            color: #ffffff;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn-login:hover {
+            background: #452f7a;
+        }
+
+        /* GOOGLE */
+
+        .btn-google {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 180px;
+            height: 34px;
+            margin: 10px auto 0;
+            border: none;
+            border-radius: 18px;
+            background: #563b94;
+            color: #ffffff;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .btn-google:hover {
+            background: #452f7a;
+        }
+
+        /* RECUPERAR */
+
+        .recuperar {
+            display: block;
+            margin-top: 39px;
+            color: #563b94;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .recuperar:hover {
+            text-decoration: underline;
+        }
+
+        /* SEPARADOR */
+
+        .separador {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-top: 8px;
+            margin-bottom: 22px;
+        }
+
+        .linea {
+            width: 42%;
+            border-top: 1px solid #563b94;
+        }
+
+        .punto {
+            width: 7px;
+            height: 7px;
+            border: 2px solid #563b94;
+            border-radius: 50%;
+            margin: 0 10px;
+        }
+
+        /* REGISTRO */
+
+        .registro {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 5px;
+            font-size: 13px;
+            color: #222222;
+        }
+
+        .registro a {
+            color: #222222;
+            text-decoration: none;
+        }
+
+        .registro a:hover {
+            text-decoration: underline;
+        }
+
+        /* MENSAJES */
+
+        .alerta {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background: #ffdddd;
+            border-left: 5px solid #f44336;
+            color: #a94442;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        /* CELULAR */
+
+        @media (max-width: 480px) {
+
+            .contenedor {
+                padding: 20px 30px 30px;
+            }
+
+            .logo {
+                width: 245px;
+                height: 170px;
+            }
+
+            .nombre {
+                font-size: 34px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <div class="contenedor">
+
+
+        <!-- LOGO CULTURAACTIVA -->
+
+        <img
+            src="../imagen/usuario.png"
+            alt="CulturaActiva Pasto"
+            class="logo"
+        >
+
+
+        <!-- NOMBRE -->
+
+        <div class="nombre">
+
+            <span class="cultura">Cultura</span><span class="activa">Activa</span>
+
+        </div>
+
+
+        <!-- PASTO -->
+
+        <div class="pasto">
+
+            PASTO
+
+        </div>
+
+
+        <!-- FRASE -->
+
+        <p class="descripcion">
+
+            Conecta con la cultura, vive tu ciudad.
+
+        </p>
+
+
+        <!-- MENSAJE DE ERROR -->
+
+        <div id="mensaje"></div>
+
+
+        <!-- FORMULARIO LOGIN -->
+
+        <form
+            name="Login-Form"
+            action="signin.php"
+            method="POST"
+        >
+
+
+            <!-- CORREO -->
+
+            <div class="campo">
+
+                <label for="correo">
+
+                    Correo Electronico
+
+                </label>
+
+                <input
+                    type="email"
+                    id="correo"
+                    name="correo"
+                    autocomplete="email"
+                    required
+                >
+
+            </div>
+
+
+            <!-- CONTRASEÑA -->
+
+            <div class="campo">
+
+                <label for="contrasena">
+
+                    Contraseña
+
+                </label>
+
+                <input
+                    type="password"
+                    id="contrasena"
+                    name="contrasena"
+                    autocomplete="current-password"
+                    required
+                >
+
+            </div>
+
+
+            <!-- BOTÓN INICIAR SESIÓN -->
+
+            <button
+                type="submit"
+                class="btn-login"
+            >
+
+                Iniciar Sesión
+
+            </button>
+
+
+        </form>
+
+
+
+        <!-- RECUPERAR CONTRASEÑA -->
+
+        <a
+            href="recuperar.html"
+            class="recuperar"
+        >
+
+            ¿Olvidaste tu contraseña?
+
+        </a>
+
+
+        <!-- SEPARADOR -->
+
+        <div class="separador">
+
+            <div class="linea"></div>
+
+            <div class="punto"></div>
+
+            <div class="linea"></div>
+
+        </div>
+
+
+        <!-- REGISTRO -->
+
+        <div class="registro">
+
+            <span>
+
+                ¿No tienes cuenta?
+
+            </span>
+
+            <a href="registro.html">
+
+                Registrarse
+
+            </a>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- SUPABASE -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+    <script>
+
+        /*
+         * DATOS DE SUPABASE
+         *
+         * Reemplaza estos dos valores
+         * por los datos públicos de tu proyecto.
+         */
+
+        const SUPABASE_URL = "TU_URL_DE_SUPABASE";
+
+        const SUPABASE_KEY = "TU_CLAVE_PUBLICA_DE_SUPABASE";
+
+
+        /*
+         * Crear conexión con Supabase
+         */
+
+        const supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+
+        /*
+         * INICIAR SESIÓN CON GOOGLE
+         */
+
+        async function iniciarSesionGoogle() {
+
+            try {
+
+                const { error } =
+                    await supabaseClient.auth.signInWithOAuth({
+
+                        provider: "google",
+
+                        options: {
+
+                            redirectTo:
+                                window.location.origin +
+                                "/trabajo-interstructurante-/pagina/principal.php"
+
+                        }
+
+                    });
+
+
+                if (error) {
+
+                    console.error(error);
+
+                    alert(
+                        "No se pudo iniciar sesión con Google."
+                    );
+
+                }
+
+            }
+
+            catch (error) {
+
+                console.error(error);
+
+                alert(
+                    "Ocurrió un error al iniciar sesión con Google."
+                );
+
+            }
+
+        }
+
+
+        /*
+         * MENSAJES DEL PHP
+         */
+
+        const parametros =
+            new URLSearchParams(window.location.search);
+
+        const error =
+            parametros.get("error");
+
+        const mensaje =
+            document.getElementById("mensaje");
+
+
+        if (error) {
+
+            let texto = "";
+
+
+            if (error === "usuario_no_encontrado") {
+
+                texto = "❌ Usuario no encontrado";
+
+            }
+
+
+            else if (error === "contrasena_incorrecta") {
+
+                texto = "⚠️ Contraseña incorrecta";
+
+            }
+
+
+            else if (error === "campos_vacios") {
+
+                texto = "⚠️ Complete todos los campos";
+
+            }
+
+
+            else if (error === "conexion") {
+
+                texto =
+                    "❌ Error de conexión con la base de datos";
+
+            }
+
+
+            if (texto !== "") {
+
+                mensaje.innerHTML =
+                    '<div class="alerta">' +
+                    texto +
+                    '</div>';
+
+            }
+
+        }
+
+    </script>
+
+
+</body>
+
+</html>
