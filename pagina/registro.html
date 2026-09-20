@@ -1,11 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Crear una cuenta - CulturaActiva Pasto</title>
 
     <style>
+
         * {
             box-sizing: border-box;
         }
@@ -46,6 +53,27 @@
             font-weight: normal;
             margin-top: 20px;
             margin-bottom: 42px;
+        }
+
+        .mensaje {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 18px;
+            text-align: center;
+            font-size: 13px;
+            border: 1px solid;
+        }
+
+        .mensaje.error {
+            color: #a00000;
+            background: #ffe5e5;
+            border-color: #d00000;
+        }
+
+        .mensaje.exito {
+            color: #176b2c;
+            background: #e5f7e9;
+            border-color: #26943d;
         }
 
         .campo {
@@ -108,7 +136,9 @@
             color: #4b006f;
             text-decoration: none;
         }
+
     </style>
+
 </head>
 
 <body>
@@ -117,54 +147,207 @@
 
         <a href="signin.html" class="volver">←</a>
 
-        <img src="../imagen/usuario1.png"
-             alt="CulturaActiva Pasto"
-             class="logo">
+        <img
+            src="../imagen/usuario1.png"
+            alt="CulturaActiva Pasto"
+            class="logo"
+        >
 
         <div class="titulo">
             Crear una cuenta
         </div>
 
+
+        <!-- Mensajes -->
+
+        <div
+            id="mensaje"
+            class="mensaje"
+            style="display: none;"
+        ></div>
+
+
         <form action="registro.php" method="POST">
 
             <div class="campo">
-                <label for="nombre">Nombre completo</label>
-                <input type="text" id="nombre" name="nombre" required>
+
+                <label for="nombre">
+                    Nombre completo
+                </label>
+
+                <input
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    required
+                >
+
             </div>
+
 
             <div class="campo">
-                <label for="correo">Correo electronico</label>
-                <input type="email" id="correo" name="correo" required>
+
+                <label for="correo">
+                    Correo electronico
+                </label>
+
+                <input
+                    type="email"
+                    id="correo"
+                    name="correo"
+                    required
+                >
+
             </div>
+
 
             <div class="campo">
-                <label for="contrasena">Contraseña</label>
-                <input type="password" id="contrasena" name="contrasena" required>
+
+                <label for="contrasena">
+                    Contraseña
+                </label>
+
+                <input
+                    type="password"
+                    id="contrasena"
+                    name="contrasena"
+                    required
+                >
+
             </div>
+
 
             <div class="campo">
-                <label for="confirmar">Confirmar Contraseña</label>
-                <input type="password" id="confirmar" name="confirmar" required>
+
+                <label for="confirmar">
+                    Confirmar Contraseña
+                </label>
+
+                <input
+                    type="password"
+                    id="confirmar"
+                    name="confirmar"
+                    required
+                >
+
             </div>
 
-            <button type="submit" class="boton">
+
+            <button
+                type="submit"
+                class="boton"
+            >
                 Crear cuenta
             </button>
 
         </form>
 
+
         <div class="separador">
+
             <div class="linea"></div>
-            <div class="circulo">°</div>
+
+            <div class="circulo">
+                °
+            </div>
+
             <div class="linea"></div>
+
         </div>
 
+
         <div class="cuenta">
-            <span>¿Ya tienes cuenta?</span>
-            <a href="signin.html">Iniciar sesión</a>
+
+            <span>
+                ¿Ya tienes cuenta?
+            </span>
+
+            <a href="signin.html">
+                Iniciar sesión
+            </a>
+
         </div>
 
     </div>
+
+
+    <script>
+
+        const parametros = new URLSearchParams(
+            window.location.search
+        );
+
+        const error = parametros.get("error");
+
+        const registro = parametros.get("registro");
+
+        const mensaje = document.getElementById("mensaje");
+
+
+        // Contraseñas diferentes
+
+        if (error === "contrasenas_no_coinciden") {
+
+            mensaje.textContent =
+                "Las contraseñas no coinciden.";
+
+            mensaje.className =
+                "mensaje error";
+
+            mensaje.style.display =
+                "block";
+
+        }
+
+
+        // Campos vacios
+
+        else if (error === "campos_vacios") {
+
+            mensaje.textContent =
+                "Por favor, completa todos los campos.";
+
+            mensaje.className =
+                "mensaje error";
+
+            mensaje.style.display =
+                "block";
+
+        }
+
+
+        // Correo existente
+
+        else if (error === "correo_existente") {
+
+            mensaje.textContent =
+                "Este correo ya está registrado.";
+
+            mensaje.className =
+                "mensaje error";
+
+            mensaje.style.display =
+                "block";
+
+        }
+
+
+        // Perfil creado
+
+        else if (registro === "exitoso") {
+
+            mensaje.textContent =
+                "Perfil creado correctamente.";
+
+            mensaje.className =
+                "mensaje exito";
+
+            mensaje.style.display =
+                "block";
+
+        }
+
+    </script>
 
 </body>
 </html>

@@ -12,19 +12,24 @@ $correo = trim($_POST["correo"] ?? "");
 $contrasena = trim($_POST["contrasena"] ?? "");
 $confirmar = trim($_POST["confirmar"] ?? "");
 
-/* Verificar que los campos estén llenos */
+/* Verificar campos vacios */
+
 if ($nombre === "" || $correo === "" || $contrasena === "" || $confirmar === "") {
     header("Location: registro.html?error=campos_vacios");
     exit;
 }
 
-/* Verificar que las contraseñas coincidan */
+
+/* Verificar que las dos contraseñas sean iguales */
+
 if ($contrasena !== $confirmar) {
     header("Location: registro.html?error=contrasenas_no_coinciden");
     exit;
 }
 
-/* Verificar que el correo no esté registrado */
+
+/* Verificar que el correo no exista */
+
 $sql = "SELECT id_usuario
         FROM usuario
         WHERE correo = $1";
@@ -44,7 +49,9 @@ if (pg_num_rows($resultado) > 0) {
     exit;
 }
 
-/* Registrar el nuevo usuario */
+
+/* Crear el usuario */
+
 $sql_insertar = "INSERT INTO usuario
                  (nombre, correo, contrasena)
                  VALUES ($1, $2, $3)";
@@ -59,7 +66,9 @@ if (!$insertado) {
     die("Error al registrar el usuario.");
 }
 
-/* Registro exitoso */
+
+/* Registro correcto */
+
 header("Location: signin.html?registro=exitoso");
 exit;
 

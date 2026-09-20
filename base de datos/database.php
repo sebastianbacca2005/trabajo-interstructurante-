@@ -30,15 +30,7 @@ $local_data_connection = "
 $conn_supa = pg_connect($supa_data_connection);
 $conn_local = pg_connect($local_data_connection);
 
-if(!$conn_supa) {
-    echo "❌ ERROR CON SUPABASE: " . pg_last_error();
-} else {
-    echo "✅ SUPABASE CONNECTION SUCCESSFULLY :::<br>";
-}
 
-if(!$conn_local) {
-    echo "❌ ERROR CON LOCAL: " . pg_last_error();
-} else {
-    echo "✅ LOCAL CONNECTION SUCCESSFULLY :::";
-}
+
 ?>
+

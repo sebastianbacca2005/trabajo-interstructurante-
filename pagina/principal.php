@@ -2,13 +2,41 @@
 
 session_start();
 
-/* Verificar que el usuario haya iniciado sesión */
+require_once "../base de datos/database.php";
+
 if (!isset($_SESSION["id_usuario"])) {
     header("Location: signin.html");
     exit;
 }
 
-$nombre = $_SESSION["nombre"];
+$id_usuario = $_SESSION["id_usuario"];
+
+$sql = "SELECT
+            id_evento,
+            id_usuario,
+            titulo,
+            descripcion,
+            fecha,
+            hora,
+            lugar,
+            imagen,
+            latitud,
+            longitud
+        FROM evento
+        WHERE estado = 'aceptado'
+        ORDER BY fecha ASC, hora ASC";
+
+$resultado = pg_query($conn_supa, $sql);
+
+if (!$resultado) {
+    die("Error al cargar los eventos.");
+}
+
+$eventos = [];
+
+while ($fila = pg_fetch_assoc($resultado)) {
+    $eventos[] = $fila;
+}
 
 ?>
 
@@ -17,552 +45,776 @@ $nombre = $_SESSION["nombre"];
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>CulturaActiva Pasto</title>
+<title>CulturaActiva Pasto</title>
 
-    <style>
+<style>
 
-        * {
-            box-sizing: border-box;
-        }
+* {
+    box-sizing: border-box;
+}
 
-        body {
-            margin: 0;
-            background: #ffffff;
-            font-family: Arial, Helvetica, sans-serif;
-            color: #222222;
-        }
+html,
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: #eeeeee;
+}
 
-        .contenedor {
-            width: 100%;
-            max-width: 430px;
-            min-height: 100vh;
-            margin: 0 auto;
-            padding-bottom: 90px;
-        }
+/* APP */
 
-        /* ENCABEZADO */
+.app {
+    width: 100%;
+    max-width: 485px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: #51006f;
+    padding-bottom: 75px;
+}
 
-        .encabezado {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 25px 10px;
-        }
+/* CABECERA */
 
-        .logo {
-            width: 150px;
-            height: 75px;
-            object-fit: contain;
-        }
+header {
+    width: 100%;
+    height: 145px;
+    background: white;
 
-        .perfil {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: #563b94;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 19px;
-        }
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-        /* BIENVENIDA */
+    padding: 15px 25px;
+}
 
-        .bienvenida {
-            text-align: left;
-            padding: 5px 25px 15px;
-        }
+.logo {
+    width: 175px;
+    height: auto;
+}
 
-        .bienvenida h1 {
-            margin: 0;
-            font-size: 22px;
-            color: #28105f;
-        }
+.usuario {
+    color: #333;
+    text-decoration: none;
+}
 
-        .bienvenida p {
-            margin-top: 7px;
-            font-size: 13px;
-            color: #555555;
-        }
+/* CONTENIDO */
 
-        /* BUSCADOR */
+.contenedor {
+    width: 100%;
+    padding: 0 22px;
+}
 
-        .buscador {
-            margin: 5px 25px 25px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            background: #eeeeee;
-            border: 1px solid #cccccc;
-        }
+/* BUSCADOR */
 
-        .buscador span {
-            margin-left: 12px;
-            font-size: 18px;
-        }
+.buscador {
+    display: block;
 
-        .buscador input {
-            width: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-            padding: 8px;
-            font-size: 13px;
-        }
+    width: 100%;
+    height: 45px;
 
-        /* TITULOS */
+    margin-top: 22px;
 
-        .titulo-seccion {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 25px;
-            margin-bottom: 12px;
-        }
+    padding: 0 18px;
 
-        .titulo-seccion h2 {
-            margin: 0;
-            font-size: 17px;
-            color: #28105f;
-        }
+    border: none;
+    border-radius: 25px;
 
-        .titulo-seccion a {
-            color: #563b94;
-            text-decoration: none;
-            font-size: 12px;
-        }
+    font-size: 14px;
 
-        /* EVENTOS */
+    outline: none;
+}
 
-        .eventos {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-            padding: 0 25px 10px;
-        }
+/* TITULO */
 
-        .evento {
-            min-width: 250px;
-            border: 1px solid #dddddd;
-            background: white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.10);
-        }
+.titulo {
+    display: block;
 
-        .evento-imagen {
-            height: 125px;
-            background: #dddddd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-        }
+    color: white;
 
-        .evento-contenido {
-            padding: 12px;
-            text-align: left;
-        }
+    font-size: 19px;
 
-        .evento-contenido h3 {
-            margin: 0 0 7px;
-            font-size: 15px;
-        }
+    margin-top: 28px;
+    margin-bottom: 18px;
+}
 
-        .evento-contenido p {
-            margin: 4px 0;
-            font-size: 11px;
-            color: #666666;
-        }
+/* PUBLICAR */
 
-        .boton-evento {
-            display: inline-block;
-            margin-top: 8px;
-            padding: 7px 12px;
-            background: #563b94;
-            color: white;
-            text-decoration: none;
-            font-size: 11px;
-        }
+.publicar {
+    display: block;
 
-        /* PROXIMOS */
+    width: 100%;
+    height: 35px;
 
-        .proximos {
-            padding: 0 25px;
-        }
+    background: white;
+    color: #4b1f78;
 
-        .evento-lista {
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid #dddddd;
-            padding: 13px 0;
-        }
+    text-align: center;
 
-        .fecha {
-            width: 50px;
-            height: 50px;
-            background: #563b94;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-        }
+    text-decoration: none;
 
-        .fecha .dia {
-            font-size: 18px;
-            font-weight: bold;
-        }
+    padding-top: 9px;
 
-        .fecha .mes {
-            font-size: 9px;
-        }
+    font-size: 13px;
 
-        .evento-info {
-            text-align: left;
-            flex: 1;
-        }
+    border-radius: 4px;
 
-        .evento-info h3 {
-            margin: 0 0 5px;
-            font-size: 14px;
-        }
+    margin-bottom: 25px;
+}
 
-        .evento-info p {
-            margin: 0;
-            font-size: 11px;
-            color: #666666;
-        }
+/* EVENTOS */
 
-        .corazon {
-            font-size: 20px;
-            color: #563b94;
-        }
+.lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
 
-        /* BARRA INFERIOR */
+.evento {
+    width: 100%;
 
-        .barra {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 430px;
-            height: 70px;
-            background: white;
-            border-top: 1px solid #dddddd;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
-        }
+    display: flex;
 
-        .nav-item {
-            text-decoration: none;
-            color: #777777;
-            text-align: center;
-            font-size: 10px;
-        }
+    min-height: 125px;
+}
 
-        .nav-item span {
-            display: block;
-            font-size: 21px;
-            margin-bottom: 3px;
-        }
+.imagen {
+    width: 42%;
+    height: 125px;
 
-        .nav-item.activo {
-            color: #563b94;
-        }
+    object-fit: cover;
+}
 
-        /* CELULAR */
+.sin-imagen {
+    width: 42%;
+    height: 125px;
 
-        @media (max-width: 430px) {
+    background: #ddd;
 
-            .contenedor {
-                max-width: 100%;
-            }
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-        }
+    color: #777;
 
-    </style>
+    font-size: 12px;
+}
+
+.info {
+    width: 58%;
+
+    color: white;
+
+    padding-left: 8px;
+}
+
+.nombre {
+    background: #f04444;
+
+    padding: 9px;
+
+    font-size: 15px;
+}
+
+.evento:nth-child(2n) .nombre {
+    background: #f28b20;
+}
+
+.evento:nth-child(3n) .nombre {
+    background: #35bd58;
+}
+
+.dato {
+    font-size: 12px;
+
+    padding: 5px 9px;
+}
+
+.descripcion {
+    font-size: 12px;
+
+    padding: 5px 9px;
+}
+
+.mapa {
+    display: inline-block;
+
+    color: white;
+
+    font-size: 12px;
+
+    padding: 5px 9px;
+
+    text-decoration: none;
+}
+
+.eliminar {
+    margin: 5px 9px;
+
+    padding: 6px 10px;
+
+    border: none;
+
+    border-radius: 5px;
+
+    background: #d62828;
+
+    color: white;
+
+    font-size: 11px;
+
+    cursor: pointer;
+}
+
+/* SIN EVENTOS */
+
+.vacio {
+    color: white;
+
+    text-align: center;
+
+    padding: 40px 10px;
+
+    font-size: 15px;
+}
+
+/* ADMIN */
+
+.admin {
+    margin-top: 25px;
+}
+
+.admin a {
+    display: block;
+
+    background: white;
+
+    color: #4b1f78;
+
+    padding: 10px;
+
+    text-align: center;
+
+    text-decoration: none;
+
+    border-radius: 6px;
+}
+
+/* BARRA INFERIOR */
+
+.nav {
+    position: fixed;
+
+    left: 50%;
+    bottom: 0;
+
+    transform: translateX(-50%);
+
+    width: 100%;
+    max-width: 485px;
+
+    height: 65px;
+
+    background: white;
+
+    display: flex;
+
+    justify-content: space-around;
+
+    align-items: center;
+
+    z-index: 9999;
+
+    border-top: 1px solid #ddd;
+}
+
+.nav a {
+    width: 20%;
+
+    height: 65px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #333;
+
+    text-decoration: none;
+
+    font-size: 10px;
+
+    cursor: pointer;
+}
+
+.nav a:hover {
+    color: #4b1f78;
+}
+
+.icono {
+    width: 22px;
+    height: 22px;
+
+    margin-bottom: 4px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.icono svg {
+    width: 21px;
+    height: 21px;
+
+    stroke: currentColor;
+
+    fill: none;
+
+    stroke-width: 1.7;
+
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.activo {
+    color: #4b1f78 !important;
+
+    font-weight: bold;
+}
+
+</style>
 
 </head>
 
 <body>
 
-<div class="contenedor">
 
-    <!-- ENCABEZADO -->
+<div class="app">
 
-    <div class="encabezado">
 
-        <img
-            src="../imagen/usuario.png"
-            alt="CulturaActiva Pasto"
-            class="logo"
-        >
+<!-- CABECERA -->
 
-        <div class="perfil">
-            👤
-        </div>
+<header>
 
-    </div>
+<img
+    src="../imagen/usuario.png"
+    class="logo"
+    alt="CulturaActiva Pasto"
+>
 
+<a
+    href="perfil.php"
+    class="usuario"
+>
 
-    <!-- BIENVENIDA -->
+<svg
+    width="25"
+    height="25"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+>
 
-    <div class="bienvenida">
+<circle
+    cx="12"
+    cy="8"
+    r="3"
+></circle>
 
-        <h1>
-            ¡Hola, <?php echo htmlspecialchars($nombre); ?>!
-        </h1>
+<path
+    d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"
+></path>
 
-        <p>
-            Descubre lo que está pasando en Pasto.
-        </p>
+<circle
+    cx="12"
+    cy="12"
+    r="10"
+></circle>
 
-    </div>
+</svg>
 
+</a>
 
-    <!-- BUSCADOR -->
+</header>
 
-    <div class="buscador">
 
-        <span>🔍</span>
+<!-- CONTENIDO -->
 
-        <input
-            type="text"
-            placeholder="Buscar eventos..."
-        >
+<main class="contenedor">
 
-    </div>
 
+<!-- BUSCADOR -->
 
-    <!-- EVENTOS DESTACADOS -->
+<input
+    type="text"
+    id="buscador"
+    class="buscador"
+    placeholder="Buscar eventos, artistas, lugares..."
+>
 
-    <div class="titulo-seccion">
 
-        <h2>Eventos destacados</h2>
+<!-- TITULO -->
 
-        <a href="#">Ver todos</a>
+<h2 class="titulo">
+    EVENTOS DESTACADOS
+</h2>
 
-    </div>
 
+<!-- PUBLICAR -->
 
-    <div class="eventos">
+<a
+    href="publicar_evento.php"
+    class="publicar"
+>
+    + Publicar evento
+</a>
 
-        <div class="evento">
 
-            <div class="evento-imagen">
-                🎭
-            </div>
+<!-- EVENTOS -->
 
-            <div class="evento-contenido">
+<?php if (count($eventos) > 0): ?>
 
-                <h3>
-                    Festival Cultural de Pasto
-                </h3>
+<div class="lista">
 
-                <p>
-                    📅 Próximamente
-                </p>
+<?php foreach ($eventos as $evento): ?>
 
-                <p>
-                    📍 Pasto, Nariño
-                </p>
+<article
+    class="evento"
 
-                <a href="#" class="boton-evento">
-                    Ver evento
-                </a>
+    data-busqueda="<?php
 
-            </div>
+    echo htmlspecialchars(
+        strtolower(
+            $evento["titulo"] . " " .
+            ($evento["descripcion"] ?? "") . " " .
+            $evento["lugar"]
+        )
+    );
 
-        </div>
+    ?>"
+>
 
 
-        <div class="evento">
+<?php if (!empty($evento["imagen"])): ?>
 
-            <div class="evento-imagen">
-                🎶
-            </div>
+<img
+    src="<?php
+        echo htmlspecialchars($evento["imagen"]);
+    ?>"
+    class="imagen"
+    alt="Evento"
+>
 
-            <div class="evento-contenido">
+<?php else: ?>
 
-                <h3>
-                    Música y Cultura
-                </h3>
+<div class="sin-imagen">
+    Sin imagen
+</div>
 
-                <p>
-                    📅 Próximamente
-                </p>
+<?php endif; ?>
 
-                <p>
-                    📍 Pasto, Nariño
-                </p>
 
-                <a href="#" class="boton-evento">
-                    Ver evento
-                </a>
+<div class="info">
 
-            </div>
 
-        </div>
+<div class="nombre">
 
-    </div>
-
-
-    <!-- PROXIMOS EVENTOS -->
-
-    <div class="titulo-seccion" style="margin-top: 25px;">
-
-        <h2>Próximos eventos</h2>
-
-        <a href="#">
-            Ver todos
-        </a>
-
-    </div>
-
-
-    <div class="proximos">
-
-        <div class="evento-lista">
-
-            <div class="fecha">
-
-                <div class="dia">
-                    15
-                </div>
-
-                <div class="mes">
-                    SEP
-                </div>
-
-            </div>
-
-            <div class="evento-info">
-
-                <h3>
-                    Evento cultural
-                </h3>
-
-                <p>
-                    📍 Centro de Pasto
-                </p>
-
-            </div>
-
-            <div class="corazon">
-                ♡
-            </div>
-
-        </div>
-
-
-        <div class="evento-lista">
-
-            <div class="fecha">
-
-                <div class="dia">
-                    20
-                </div>
-
-                <div class="mes">
-                    SEP
-                </div>
-
-            </div>
-
-            <div class="evento-info">
-
-                <h3>
-                    Exposición artística
-                </h3>
-
-                <p>
-                    📍 Pasto, Nariño
-                </p>
-
-            </div>
-
-            <div class="corazon">
-                ♡
-            </div>
-
-        </div>
-
-
-        <div class="evento-lista">
-
-            <div class="fecha">
-
-                <div class="dia">
-                    25
-                </div>
-
-                <div class="mes">
-                    SEP
-                </div>
-
-            </div>
-
-            <div class="evento-info">
-
-                <h3>
-                    Presentación musical
-                </h3>
-
-                <p>
-                    📍 Pasto, Nariño
-                </p>
-
-            </div>
-
-            <div class="corazon">
-                ♡
-            </div>
-
-        </div>
-
-    </div>
+<?php
+echo htmlspecialchars($evento["titulo"]);
+?>
 
 </div>
 
 
-<!-- BARRA DE NAVEGACIÓN -->
+<div class="dato">
 
-<div class="barra">
-
-    <a href="principal.php" class="nav-item activo">
-        <span>🏠</span>
-        Inicio
-    </a>
-
-    <a href="#" class="nav-item">
-        <span>❤️</span>
-        Favoritos
-    </a>
-
-    <a href="#" class="nav-item">
-        <span>🗺️</span>
-        Mapa
-    </a>
-
-    <a href="#" class="nav-item">
-        <span>🔔</span>
-        Avisos
-    </a>
-
-    <a href="#" class="nav-item">
-        <span>👤</span>
-        Perfil
-    </a>
+<?php
+echo htmlspecialchars($evento["fecha"]);
+?>
 
 </div>
+
+
+<div class="dato">
+
+<?php
+echo htmlspecialchars(
+    substr($evento["hora"], 0, 5)
+);
+?>
+
+</div>
+
+
+<div class="dato">
+
+<?php
+echo htmlspecialchars($evento["lugar"]);
+?>
+
+</div>
+
+
+<?php if (
+    $evento["latitud"] !== null &&
+    $evento["longitud"] !== null
+): ?>
+
+<a
+    href="mapa.php?evento=<?php
+        echo $evento["id_evento"];
+    ?>"
+    class="mapa"
+>
+    Ver ubicación
+</a>
+
+<?php endif; ?>
+
+
+<?php if (
+    $evento["id_usuario"] == $id_usuario
+): ?>
+
+<form
+    action="eliminar_evento.php"
+    method="POST"
+    onsubmit="return confirm('¿Quieres eliminar tu evento?');"
+>
+
+<input
+    type="hidden"
+    name="id_evento"
+    value="<?php
+        echo $evento["id_evento"];
+    ?>"
+>
+
+<button
+    type="submit"
+    class="eliminar"
+>
+    Eliminar mi evento
+</button>
+
+</form>
+
+<?php endif; ?>
+
+
+</div>
+
+</article>
+
+<?php endforeach; ?>
+
+</div>
+
+
+<?php else: ?>
+
+<div class="vacio">
+    No hay eventos publicados todavía.
+</div>
+
+<?php endif; ?>
+
+
+<?php if (
+    isset($_SESSION["rol"]) &&
+    $_SESSION["rol"] === "admin"
+): ?>
+
+<div class="admin">
+
+<a href="administrador.php">
+    Administrar eventos
+</a>
+
+</div>
+
+<?php endif; ?>
+
+
+</main>
+
+
+<!-- BARRA -->
+
+<nav class="nav">
+
+
+<!-- INICIO -->
+
+<a
+    href="principal.php"
+    class="activo"
+>
+
+<span class="icono">
+
+<svg viewBox="0 0 24 24">
+
+<path d="M3 10.5L12 3l9 7.5"></path>
+
+<path d="M5 9.5V21h14V9.5"></path>
+
+<path d="M9 21v-7h6v7"></path>
+
+</svg>
+
+</span>
+
+Inicio
+
+</a>
+
+
+<!-- FAVORITOS -->
+
+<a href="favoritos.php">
+
+<span class="icono">
+
+<svg viewBox="0 0 24 24">
+
+<path d="M20.8 8.8c0 5.5-8.8 11-8.8 11S3.2 14.3 3.2 8.8C3.2 5.6 5.3 3.5 8.2 3.5c1.7 0 3.1.8 3.8 2.1.7-1.3 2.1-2.1 3.8-2.1 2.9 0 5 2.1 5 5.3z"></path>
+
+</svg>
+
+</span>
+
+Favoritos
+
+</a>
+
+
+<!-- MAPA -->
+
+<a href="mapa.php">
+
+<span class="icono">
+
+<svg viewBox="0 0 24 24">
+
+<path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"></path>
+
+<circle
+    cx="12"
+    cy="9"
+    r="2.5"
+></circle>
+
+</svg>
+
+</span>
+
+Mapa
+
+</a>
+
+
+<!-- NOTIFICACIONES -->
+
+<a href="notificaciones.php">
+
+<span class="icono">
+
+<svg viewBox="0 0 24 24">
+
+<path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+
+<path d="M10 21h4"></path>
+
+</svg>
+
+</span>
+
+Notificaciones
+
+</a>
+
+
+<!-- PERFIL -->
+
+<a href="perfil.php">
+
+<span class="icono">
+
+<svg viewBox="0 0 24 24">
+
+<circle
+    cx="12"
+    cy="8"
+    r="3.2"
+></circle>
+
+<path
+    d="M5 21c0-3.8 3-6 7-6s7 2.2 7 6"
+></path>
+
+</svg>
+
+</span>
+
+Perfil
+
+</a>
+
+
+</nav>
+
+
+</div>
+
+
+<script>
+
+/* BUSCADOR */
+
+const buscador = document.getElementById("buscador");
+
+const eventos = document.querySelectorAll(".evento");
+
+if (buscador) {
+
+    buscador.addEventListener("input", function () {
+
+        const texto = this.value.toLowerCase().trim();
+
+        eventos.forEach(function (evento) {
+
+            const contenido =
+                evento.dataset.busqueda || "";
+
+            if (contenido.includes(texto)) {
+
+                evento.style.display = "flex";
+
+            } else {
+
+                evento.style.display = "none";
+
+            }
+
+        });
+
+    });
+
+}
+
+</script>
+
 
 </body>
+
 </html>
