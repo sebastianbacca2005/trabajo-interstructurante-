@@ -2,10 +2,41 @@
 
 session_start();
 
-// Verificar sesion
+require_once "../base de datos/database.php";
+
+// Verificar sesión
 if (!isset($_SESSION["id_usuario"])) {
     header("Location: signin.html");
     exit;
+}
+
+/*
+ * Las notificaciones se generan a partir de los eventos aceptados.
+ * Así, cada evento que se publique y sea aceptado aparece automáticamente
+ * en esta sección.
+ */
+$sql = "SELECT
+            id_evento,
+            titulo,
+            descripcion,
+            fecha,
+            hora,
+            lugar,
+            imagen
+        FROM evento
+        WHERE estado = 'aceptado'
+        ORDER BY fecha DESC, hora DESC";
+
+$resultado = pg_query($conn_supa, $sql);
+
+if (!$resultado) {
+    die("Error al cargar las notificaciones.");
+}
+
+$eventos = [];
+
+while ($fila = pg_fetch_assoc($resultado)) {
+    $eventos[] = $fila;
 }
 
 ?>
@@ -32,318 +63,508 @@ if (!isset($_SESSION["id_usuario"])) {
             padding: 0;
         }
 
+        html,
         body {
+            margin: 0;
+            padding: 0;
             font-family: Arial, Helvetica, sans-serif;
             background: #eeeeee;
+            color: #222;
         }
 
-
-        /* Contenedor */
+        body {
+            min-height: 100vh;
+        }
 
         .app {
             width: 100%;
-            max-width: 430px;
             min-height: 100vh;
-            margin: auto;
-            background: #50006f;
-            padding-bottom: 70px;
+            background: #51006f;
+            padding-bottom: 72px;
         }
 
+        /* ENCABEZADO IGUAL AL PRINCIPAL */
 
-        /* Encabezado */
-
-        .header {
-            height: 126px;
-            background: white;
-            position: relative;
-            padding: 8px 15px;
+        header {
+            width: 100%;
+            height: 112px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding: 0 5vw;
+            gap: 28px;
         }
-
-
-        /* Logo */
 
         .logo {
-            width: 105px;
+            width: 145px;
             height: auto;
-            display: block;
-            margin-top: 2px;
+            flex-shrink: 0;
         }
 
-
-        /* Titulo */
-
         .titulo-app {
-            position: absolute;
-            left: 126px;
-            top: 10px;
-            color: #50006f;
+            color: #51006f;
+            line-height: 1.05;
+            min-width: 150px;
         }
 
         .nombre-app {
-            font-size: 23px;
-            font-weight: bold;
-            line-height: 25px;
+            font-size: 21px;
+            font-weight: 700;
         }
 
         .ciudad-app {
-            font-size: 16px;
-            font-weight: bold;
-            line-height: 18px;
+            font-size: 15px;
+            font-weight: 700;
+            margin-top: 2px;
         }
 
         .eslogan-app {
             font-size: 8px;
             color: #555;
-            margin-top: 2px;
+            margin-top: 4px;
         }
 
-
-        /* Perfil */
-
-        .perfil-superior {
-            position: absolute;
-            right: 18px;
-            top: 28px;
-            width: 22px;
-            height: 22px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
+        .buscador-wrap {
+            position: relative;
+            width: min(700px, 100%);
+            margin: 0 auto;
         }
-
-        .perfil-superior svg {
-            width: 100%;
-            height: 100%;
-            stroke: #333;
-            fill: none;
-            stroke-width: 1.5;
-        }
-
-
-        /* Buscador */
 
         .buscador {
-            position: absolute;
-            top: 77px;
-            left: 126px;
-            right: 15px;
-            height: 33px;
-            background: white;
-            border: 1px solid #222;
-            display: flex;
-            align-items: center;
+            display: block;
+            width: 100%;
+            height: 48px;
+            padding: 0 20px 0 48px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            background: #fff;
         }
 
         .icono-busqueda {
-            width: 30px;
-            height: 100%;
+            position: absolute;
+            left: 17px;
+            top: 13px;
+            width: 22px;
+            height: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 1;
         }
 
         .icono-busqueda svg {
-            width: 16px;
-            height: 16px;
-            stroke: #111;
-            fill: none;
-            stroke-width: 1.8;
-        }
-
-        .buscador input {
             width: 100%;
             height: 100%;
-            border: none;
-            outline: none;
-            font-size: 11px;
-            padding-right: 5px;
+            stroke: #555;
+            fill: none;
+            stroke-width: 1.7;
+            stroke-linecap: round;
         }
 
-
-        /* Contenido */
-
-        .contenido {
-            padding: 31px 10px 25px 10px;
-            color: white;
-        }
-
-        .titulo-seccion {
-            font-size: 14px;
-            font-weight: normal;
-            margin: 0 0 20px 9px;
-        }
-
-
-        /* Lista de notificaciones */
-
-        .lista-notificaciones {
-            width: 100%;
-        }
-
-
-        /* Notificacion */
-
-        .notificacion {
-            width: 100%;
-            min-height: 72px;
-            background: #6d2788;
-            margin-bottom: 9px;
-            display: flex;
-            align-items: center;
-            padding: 10px;
-        }
-
-
-        /* Icono */
-
-        .icono-notificacion {
-            width: 42px;
-            min-width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: white;
+        .perfil-superior {
+            color: #333;
+            text-decoration: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 10px;
+            margin-left: 8px;
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+            flex-shrink: 0;
         }
 
-        .icono-notificacion svg {
-            width: 22px;
-            height: 22px;
-            stroke: #50006f;
+        .perfil-superior svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        /* CONTENIDO */
+
+        .contenedor {
+            width: min(1180px, 92%);
+            margin: 0 auto;
+            padding: 35px 0 50px;
+        }
+
+        .hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 30px;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            margin: 0;
+            color: #fff;
+            font-size: 32px;
+        }
+
+        .hero p {
+            margin: 7px 0 0;
+            color: #eadcf0;
+            font-size: 15px;
+        }
+
+        /* LISTA DE NOTIFICACIONES */
+
+        .lista-notificaciones {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .notificacion {
+            width: 100%;
+            min-height: 105px;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, .16);
+            display: flex;
+            align-items: stretch;
+        }
+
+        .notificacion-icono {
+            width: 84px;
+            min-width: 84px;
+            background: #6d2788;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notificacion-icono svg {
+            width: 30px;
+            height: 30px;
+            stroke: #fff;
             fill: none;
             stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
-
-        /* Texto */
-
-        .texto-notificacion {
+        .notificacion-info {
             flex: 1;
+            padding: 16px 18px;
+            min-width: 0;
         }
 
-        .texto-notificacion strong {
-            display: block;
+        .notificacion-titulo {
+            color: #4b1f78;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+
+        .notificacion-mensaje {
+            color: #444;
+            font-size: 13px;
+            line-height: 1.45;
+            margin-bottom: 10px;
+        }
+
+        .notificacion-datos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 18px;
+            color: #666;
             font-size: 12px;
-            margin-bottom: 5px;
         }
 
-        .texto-notificacion span {
-            display: block;
-            font-size: 10px;
-            color: #eeeeee;
-            line-height: 14px;
+        .notificacion-dato {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
 
+        .notificacion-dato svg {
+            width: 15px;
+            height: 15px;
+            stroke: #4b1f78;
+            fill: none;
+            stroke-width: 1.6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
 
-        /* Sin notificaciones */
+        .notificacion-imagen {
+            width: 150px;
+            min-width: 150px;
+            height: 105px;
+            object-fit: cover;
+            background: #ddd;
+        }
+
+        .boton-evento {
+            display: inline-flex;
+            margin-top: 12px;
+            background: #4b1f78;
+            color: #fff;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+        }
 
         .sin-notificaciones {
             width: 100%;
-            min-height: 150px;
+            min-height: 180px;
             border: 1px dashed rgba(255, 255, 255, 0.6);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 20px;
+            padding: 30px;
+            color: #fff;
         }
 
         .sin-notificaciones svg {
-            width: 42px;
-            height: 42px;
-            margin-bottom: 12px;
-            stroke: white;
+            width: 48px;
+            height: 48px;
+            margin-bottom: 14px;
+            stroke: #fff;
             fill: none;
             stroke-width: 1.5;
         }
 
         .sin-notificaciones p {
-            font-size: 13px;
-            margin-bottom: 5px;
+            font-size: 15px;
+            margin-bottom: 6px;
         }
 
         .sin-notificaciones small {
-            font-size: 10px;
-            color: #dddddd;
+            font-size: 12px;
+            color: #ddd;
         }
 
+        .sin-resultados {
+            display: none;
+            background: #fff;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            color: #555;
+            margin-top: 12px;
+        }
 
-        /* Menu inferior */
+        /* NAVEGACIÓN INFERIOR IGUAL AL PRINCIPAL */
 
-        .menu-inferior {
+        .nav {
             position: fixed;
+            left: 0;
             bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
             width: 100%;
-            max-width: 430px;
-            height: 69px;
-            background: white;
-            border-top: 1px solid #ddd;
+            height: 72px;
+            background: #fff;
             display: flex;
-            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            gap: 55px;
+            border-top: 1px solid #ddd;
+            padding: 0 20px;
+            z-index: 1000;
         }
 
-        .menu-item {
-            flex: 1;
-            border: none;
-            background: white;
+        .nav a {
+            min-width: 75px;
+            height: 72px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 3px;
-            color: #111;
-            font-size: 9px;
+            color: #333;
+            text-decoration: none;
+            font-size: 11px;
             cursor: pointer;
         }
 
-        .menu-item svg {
-            width: 21px;
-            height: 21px;
-            stroke: #222;
+        .nav a:hover,
+        .activo {
+            color: #4b1f78 !important;
+        }
+
+        .icono {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icono svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
             fill: none;
             stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
-        .menu-item.activo {
-            color: #4d0870;
-            font-weight: bold;
+        @media (max-width: 900px) {
+
+            header {
+                padding: 0 3%;
+                gap: 18px;
+            }
+
+            .logo {
+                width: 120px;
+            }
+
+            .titulo-app {
+                min-width: 125px;
+            }
+
+            .nombre-app {
+                font-size: 18px;
+            }
+
+            .ciudad-app {
+                font-size: 13px;
+            }
+
+            .eslogan-app {
+                font-size: 7px;
+            }
+
+            .nav {
+                gap: 25px;
+            }
+
+            .notificacion-imagen {
+                width: 120px;
+                min-width: 120px;
+            }
+
         }
 
-        .menu-item.activo svg {
-            fill: #4d0870;
-            stroke: #4d0870;
+        @media (max-width: 650px) {
+
+            header {
+                height: auto;
+                min-height: 150px;
+                flex-wrap: wrap;
+                padding: 14px 20px;
+                gap: 10px;
+            }
+
+            .logo {
+                width: 105px;
+            }
+
+            .titulo-app {
+                min-width: 0;
+                flex: 1;
+            }
+
+            .nombre-app {
+                font-size: 18px;
+            }
+
+            .ciudad-app {
+                font-size: 13px;
+            }
+
+            .eslogan-app {
+                font-size: 7px;
+            }
+
+            header .buscador-wrap {
+                order: 5;
+                flex-basis: 100%;
+                width: 100%;
+            }
+
+            .contenedor {
+                width: 92%;
+                padding-top: 28px;
+            }
+
+            .hero {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .hero h1 {
+                font-size: 26px;
+            }
+
+            .notificacion {
+                min-height: 100px;
+            }
+
+            .notificacion-icono {
+                width: 60px;
+                min-width: 60px;
+            }
+
+            .notificacion-icono svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .notificacion-info {
+                padding: 13px 12px;
+            }
+
+            .notificacion-titulo {
+                font-size: 15px;
+            }
+
+            .notificacion-mensaje {
+                font-size: 11px;
+            }
+
+            .notificacion-datos {
+                font-size: 10px;
+                gap: 5px 10px;
+            }
+
+            .notificacion-imagen {
+                width: 95px;
+                min-width: 95px;
+                height: 100px;
+            }
+
+            .nav {
+                gap: 4px;
+                padding: 0 5px;
+            }
+
+            .nav a {
+                min-width: 55px;
+                font-size: 10px;
+            }
+
         }
 
     </style>
 
 </head>
 
-
 <body>
 
 <div class="app">
 
+    <!-- ENCABEZADO -->
 
-    <!-- Encabezado -->
-
-    <header class="header">
-
-
-        <!-- Logo -->
+    <header>
 
         <img
             src="../imagen/usuario.png"
-            alt="CulturaActiva Pasto"
             class="logo"
+            alt="CulturaActiva Pasto"
         >
-
-
-        <!-- Nombre -->
 
         <div class="titulo-app">
 
@@ -361,269 +582,320 @@ if (!isset($_SESSION["id_usuario"])) {
 
         </div>
 
+        <div class="buscador-wrap">
 
-        <!-- Perfil -->
-
-        <button
-            class="perfil-superior"
-            onclick="irPerfil()"
-        >
-
-            <svg viewBox="0 0 24 24">
-
-                <circle
-                    cx="12"
-                    cy="12"
-                    r="9"
-                ></circle>
-
-                <circle
-                    cx="12"
-                    cy="9"
-                    r="3"
-                ></circle>
-
-                <path
-                    d="M6.5 19c1.5-3 9.5-3 11 0"
-                ></path>
-
-            </svg>
-
-        </button>
-
-
-        <!-- Buscador -->
-
-        <div class="buscador">
-
-            <div class="icono-busqueda">
+            <span class="icono-busqueda">
 
                 <svg viewBox="0 0 24 24">
-
-                    <circle
-                        cx="10.5"
-                        cy="10.5"
-                        r="6.5"
-                    ></circle>
-
-                    <line
-                        x1="15.5"
-                        y1="15.5"
-                        x2="21"
-                        y2="21"
-                    ></line>
-
+                    <circle cx="10.8" cy="10.8" r="6.5"></circle>
+                    <path d="M16 16l5 5"></path>
                 </svg>
 
-            </div>
+            </span>
 
             <input
                 type="text"
                 id="busqueda"
+                class="buscador"
                 placeholder="Buscar eventos, artistas, lugares..."
             >
 
         </div>
 
-    </header>
+        <a
+            href="perfil.php"
+            class="perfil-superior"
+            aria-label="Perfil"
+        >
 
-
-    <!-- Contenido -->
-
-    <main class="contenido">
-
-
-        <!-- Titulo -->
-
-        <h2 class="titulo-seccion">
-            NOTIFICACIONES
-        </h2>
-
-
-        <!-- Sin notificaciones -->
-
-        <div class="sin-notificaciones">
-
-            <svg viewBox="0 0 24 24">
-
-                <path
-                    d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"
-                ></path>
-
-                <path
-                    d="M10 21h4"
-                ></path>
-
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <circle cx="12" cy="8" r="3"></circle>
+                <path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"></path>
+                <circle cx="12" cy="12" r="10"></circle>
             </svg>
 
-            <p>
-                No tienes notificaciones.
-            </p>
+        </a>
 
-            <small>
-                Aquí aparecerán las novedades de tus eventos.
-            </small>
+    </header>
 
-        </div>
+    <!-- CONTENIDO -->
+
+    <main class="contenedor">
+
+        <section class="hero">
+
+            <div>
+                <h1>Notificaciones</h1>
+                <p>Aquí aparecen automáticamente los nuevos eventos publicados.</p>
+            </div>
+
+        </section>
+
+        <?php if (count($eventos) > 0): ?>
+
+            <div class="lista-notificaciones" id="listaNotificaciones">
+
+                <?php foreach ($eventos as $evento): ?>
+
+                    <article
+                        class="notificacion"
+                        data-busqueda="<?php
+                            echo htmlspecialchars(
+                                strtolower(
+                                    ($evento["titulo"] ?? "") . " " .
+                                    ($evento["descripcion"] ?? "") . " " .
+                                    ($evento["lugar"] ?? "")
+                                )
+                            );
+                        ?>"
+                    >
+
+                        <div class="notificacion-icono">
+
+                            <svg viewBox="0 0 24 24">
+
+                                <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+
+                                <path d="M10 21h4"></path>
+
+                            </svg>
+
+                        </div>
+
+                        <div class="notificacion-info">
+
+                            <div class="notificacion-titulo">
+                                Nuevo evento: <?php echo htmlspecialchars($evento["titulo"]); ?>
+                            </div>
+
+                            <div class="notificacion-mensaje">
+                                Se ha publicado un nuevo evento cultural en CulturaActiva.
+                            </div>
+
+                            <div class="notificacion-datos">
+
+                                <span class="notificacion-dato">
+
+                                    <svg viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="9"></circle>
+                                        <path d="M12 7v5l3 2"></path>
+                                    </svg>
+
+                                    <?php echo htmlspecialchars($evento["fecha"]); ?>
+                                    ·
+                                    <?php echo htmlspecialchars(substr($evento["hora"], 0, 5)); ?>
+
+                                </span>
+
+                                <span class="notificacion-dato">
+
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"></path>
+                                        <circle cx="12" cy="9" r="2.5"></circle>
+                                    </svg>
+
+                                    <?php echo htmlspecialchars($evento["lugar"]); ?>
+
+                                </span>
+
+                            </div>
+
+                            <a
+                                href="principal.php"
+                                class="boton-evento"
+                            >
+                                Ver evento
+                            </a>
+
+                        </div>
+
+                        <?php if (!empty($evento["imagen"])): ?>
+
+                            <img
+                                src="<?php echo htmlspecialchars($evento["imagen"]); ?>"
+                                class="notificacion-imagen"
+                                alt="<?php echo htmlspecialchars($evento["titulo"]); ?>"
+                            >
+
+                        <?php endif; ?>
+
+                    </article>
+
+                <?php endforeach; ?>
+
+            </div>
+
+            <div id="sinResultados" class="sin-resultados">
+                No encontramos notificaciones con esa búsqueda.
+            </div>
+
+        <?php else: ?>
+
+            <div class="sin-notificaciones">
+
+                <svg viewBox="0 0 24 24">
+
+                    <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+
+                    <path d="M10 21h4"></path>
+
+                </svg>
+
+                <p>
+                    No tienes notificaciones.
+                </p>
+
+                <small>
+                    Cuando se publique y acepte un evento, aparecerá aquí.
+                </small>
+
+            </div>
+
+        <?php endif; ?>
 
     </main>
 
+    <!-- NAVEGACIÓN INFERIOR -->
 
-    <!-- Menu inferior -->
+    <nav class="nav">
 
-    <nav class="menu-inferior">
+        <a href="principal.php">
 
+            <span class="icono">
 
-        <!-- Inicio -->
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 10.5L12 3l9 7.5"></path>
+                    <path d="M5 9.5V21h14V9.5"></path>
+                    <path d="M9 21v-7h6v7"></path>
+                </svg>
 
-        <button
-            class="menu-item"
-            onclick="irInicio()"
-        >
+            </span>
 
-            <svg viewBox="0 0 24 24">
+            Inicio
 
-                <path
-                    d="M3 10.5L12 3l9 7.5v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"
-                ></path>
+        </a>
 
-            </svg>
+        <a href="favoritos.php">
 
-            <span>Inicio</span>
+            <span class="icono">
 
-        </button>
+                <svg viewBox="0 0 24 24">
+                    <path d="M20.8 8.8c0 5.5-8.8 11-8.8 11S3.2 14.3 3.2 8.8C3.2 5.6 5.3 3.5 8.2 3.5c1.7 0 3.1.8 3.8 2.1.7-1.3 2.1-2.1 3.8-2.1 2.9 0 5 2.1 5 5.3z"></path>
+                </svg>
 
+            </span>
 
-        <!-- Favoritos -->
+            Favoritos
 
-        <button
-            class="menu-item"
-            onclick="irFavoritos()"
-        >
+        </a>
 
-            <svg viewBox="0 0 24 24">
+        <a href="mapa.php">
 
-                <path
-                    d="M20.8 8.8c0 5.5-8.8 11-8.8 11S3.2 14.3 3.2 8.8A4.8 4.8 0 0 1 8 4c1.7 0 3.2 0.9 4 2.2C12.8 4.9 14.3 4 16 4a4.8 4.8 0 0 1 4.8 4.8z"
-                ></path>
+            <span class="icono">
 
-            </svg>
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"></path>
+                    <circle cx="12" cy="9" r="2.5"></circle>
+                </svg>
 
-            <span>Favoritos</span>
+            </span>
 
-        </button>
+            Mapa
 
+        </a>
 
-        <!-- Mapa -->
+        <a href="notificaciones.php" class="activo">
 
-        <button
-            class="menu-item"
-            onclick="irMapa()"
-        >
+            <span class="icono">
 
-            <svg viewBox="0 0 24 24">
+                <svg viewBox="0 0 24 24">
+                    <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                    <path d="M10 21h4"></path>
+                </svg>
 
-                <path
-                    d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"
-                ></path>
+            </span>
 
-                <circle
-                    cx="12"
-                    cy="9"
-                    r="2"
-                ></circle>
+            Notificaciones
 
-            </svg>
+        </a>
 
-            <span>Mapa</span>
+        <a href="perfil.php">
 
-        </button>
+            <span class="icono">
 
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="8" r="3.2"></circle>
+                    <path d="M5 21c0-3.8 3-6 7-6s7 2.2 7 6"></path>
+                </svg>
 
-        <!-- Notificaciones -->
+            </span>
 
-        <button
-            class="menu-item activo"
-        >
+            Perfil
 
-            <svg viewBox="0 0 24 24">
-
-                <path
-                    d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"
-                ></path>
-
-                <path
-                    d="M10 21h4"
-                ></path>
-
-            </svg>
-
-            <span>Notificaciones</span>
-
-        </button>
-
-
-        <!-- Perfil -->
-
-        <button
-            class="menu-item"
-            onclick="irPerfil()"
-        >
-
-            <svg viewBox="0 0 24 24">
-
-                <circle
-                    cx="12"
-                    cy="8"
-                    r="4"
-                ></circle>
-
-                <path
-                    d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"
-                ></path>
-
-            </svg>
-
-            <span>Perfil</span>
-
-        </button>
+        </a>
 
     </nav>
 
 </div>
 
-
 <script>
 
-    // Inicio
+    const buscador = document.getElementById("busqueda");
+    const notificaciones =
+        document.querySelectorAll(".notificacion");
+    const sinResultados =
+        document.getElementById("sinResultados");
 
-    function irInicio() {
-        window.location.href = "principal.php";
-    }
+    if (buscador) {
 
+        buscador.addEventListener("input", function() {
 
-    // Favoritos
+            const texto =
+                this.value.toLowerCase().trim();
 
-    function irFavoritos() {
-        window.location.href = "favoritos.php";
-    }
+            let encontrados = 0;
 
+            notificaciones.forEach(function(notificacion) {
 
-    // Mapa
+                const contenido =
+                    notificacion.dataset.busqueda || "";
 
-    function irMapa() {
-        window.location.href = "mapa.php";
-    }
+                const coincide =
+                    contenido.includes(texto);
 
+                notificacion.style.display =
+                    coincide ? "flex" : "flex";
 
-    // Perfil
+                if (texto === "" || coincide) {
+                    notificacion.style.display = "flex";
+                    encontrados++;
+                } else {
+                    notificacion.style.display = "none";
+                }
 
-    function irPerfil() {
-        window.location.href = "perfil.php";
+            });
+
+            if (sinResultados) {
+
+                sinResultados.style.display =
+                    texto !== "" && encontrados === 0
+                        ? "block"
+                        : "none";
+
+            }
+
+        });
+
     }
 
 </script>
-
 
 </body>
 

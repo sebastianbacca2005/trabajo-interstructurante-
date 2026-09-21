@@ -5,9 +5,12 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>CulturaActiva Pasto</title>
+    <title>CulturaActiva Pasto - Iniciar sesión</title>
 
     <style>
 
@@ -15,114 +18,163 @@
             box-sizing: border-box;
         }
 
+        html,
         body {
             margin: 0;
             padding: 0;
-            min-height: 100vh;
-            background: #ffffff;
+            min-height: 100%;
+        }
+
+        body {
+            background: #eeeeee;
             font-family: Arial, Helvetica, sans-serif;
-            color: #222222;
+            color: #222;
         }
 
-        .contenedor {
+        /* PÁGINA WEB */
+
+        .pagina {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 45px;
+            background: #eeeeee;
+        }
+
+        .contenedor-web {
             width: 100%;
-            max-width: 430px;
-            margin: 0 auto;
-            padding: 25px 35px 35px;
-            text-align: center;
+            max-width: 1100px;
+            min-height: 650px;
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            background: #fff;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
         }
 
-        /* LOGO */
+        /* PANEL IZQUIERDO */
+
+        .panel-marca {
+            background: #51006f;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 55px;
+        }
 
         .logo {
-            display: block;
-            width: 260px;
-            height: 180px;
+            width: 280px;
+            height: 210px;
             object-fit: contain;
-            margin: 0 auto;
+            display: block;
+            margin-bottom: 5px;
         }
 
-        /* NOMBRE */
-
         .nombre {
-            margin-top: 0;
-            font-size: 36px;
-            font-weight: bold;
+            font-size: 45px;
+            font-weight: 700;
             line-height: 1;
+            margin-top: 0;
         }
 
         .cultura {
-            color: #28105f;
+            color: #fff;
         }
 
         .activa {
-            color: #f04b16;
+            color: #f08a2b;
         }
 
-        /* PASTO */
-
         .pasto {
-            margin-top: 8px;
-            padding-left: 13px;
-            color: #28105f;
-            font-size: 17px;
-            font-weight: bold;
+            margin-top: 10px;
+            padding-left: 12px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
             letter-spacing: 13px;
         }
 
-        /* DESCRIPCIÓN */
-
         .descripcion {
-            margin-top: 14px;
-            margin-bottom: 55px;
+            margin-top: 18px;
+            max-width: 400px;
             font-size: 15px;
-            color: #222222;
+            line-height: 1.5;
+            color: #eadcf0;
         }
 
-        /* FORMULARIO */
+        /* PANEL DERECHO */
+
+        .panel-login {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 55px;
+            background: #fff;
+        }
+
+        .formulario {
+            width: 100%;
+            max-width: 430px;
+        }
+
+        .formulario h1 {
+            margin: 0;
+            color: #28105f;
+            font-size: 30px;
+        }
+
+        .subtitulo {
+            margin-top: 8px;
+            margin-bottom: 32px;
+            color: #666;
+            font-size: 14px;
+        }
 
         .campo {
             width: 100%;
-            text-align: left;
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }
 
         .campo label {
             display: block;
-            margin-left: 8px;
             margin-bottom: 8px;
-            font-size: 17px;
-            color: #222222;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
         }
 
         .campo input {
             width: 100%;
-            height: 30px;
-            padding: 5px 8px;
-            border: 1px solid #777777;
-            border-radius: 0;
-            background: #dddddd;
-            font-size: 15px;
+            height: 46px;
+            padding: 10px 13px;
+            border: 1px solid #9b9b9b;
+            border-radius: 4px;
+            background: #f3f3f3;
+            color: #222;
+            font-size: 14px;
             outline: none;
         }
 
         .campo input:focus {
             border: 2px solid #563b94;
-            background: #ffffff;
+            background: #fff;
         }
-
-        /* BOTÓN LOGIN */
 
         .btn-login {
             display: block;
-            width: 177px;
-            height: 40px;
-            margin: 18px auto 0;
+            width: 100%;
+            height: 46px;
+            margin-top: 8px;
             border: none;
-            border-radius: 0;
+            border-radius: 4px;
             background: #563b94;
-            color: #ffffff;
-            font-size: 13px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
             cursor: pointer;
         }
 
@@ -130,32 +182,10 @@
             background: #452f7a;
         }
 
-        /* GOOGLE */
-
-        .btn-google {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 180px;
-            height: 34px;
-            margin: 10px auto 0;
-            border: none;
-            border-radius: 18px;
-            background: #563b94;
-            color: #ffffff;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        .btn-google:hover {
-            background: #452f7a;
-        }
-
-        /* RECUPERAR */
-
         .recuperar {
             display: block;
-            margin-top: 39px;
+            margin-top: 18px;
+            text-align: right;
             color: #563b94;
             font-size: 13px;
             text-decoration: none;
@@ -165,20 +195,17 @@
             text-decoration: underline;
         }
 
-        /* SEPARADOR */
-
         .separador {
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            margin-top: 8px;
-            margin-bottom: 22px;
+            margin: 28px 0 22px;
         }
 
         .linea {
-            width: 42%;
-            border-top: 1px solid #563b94;
+            flex: 1;
+            border-top: 1px solid #d3c9df;
         }
 
         .punto {
@@ -186,21 +213,20 @@
             height: 7px;
             border: 2px solid #563b94;
             border-radius: 50%;
-            margin: 0 10px;
+            margin: 0 12px;
         }
-
-        /* REGISTRO */
 
         .registro {
             display: flex;
-            justify-content: space-between;
-            padding: 0 5px;
+            justify-content: center;
+            gap: 5px;
             font-size: 13px;
-            color: #222222;
+            color: #444;
         }
 
         .registro a {
-            color: #222222;
+            color: #28105f;
+            font-weight: 700;
             text-decoration: none;
         }
 
@@ -208,12 +234,10 @@
             text-decoration: underline;
         }
 
-        /* MENSAJES */
-
         .alerta {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
+            padding: 11px 13px;
+            margin-bottom: 18px;
             background: #ffdddd;
             border-left: 5px solid #f44336;
             color: #a94442;
@@ -221,21 +245,85 @@
             text-align: center;
         }
 
-        /* CELULAR */
+        /* TABLET */
 
-        @media (max-width: 480px) {
+        @media (max-width: 900px) {
 
-            .contenedor {
-                padding: 20px 30px 30px;
+            .pagina {
+                padding: 25px;
+            }
+
+            .contenedor-web {
+                grid-template-columns: 1fr;
+                max-width: 700px;
+            }
+
+            .panel-marca {
+                padding: 40px 30px;
+                min-height: 330px;
             }
 
             .logo {
-                width: 245px;
-                height: 170px;
+                width: 220px;
+                height: 155px;
+            }
+
+            .nombre {
+                font-size: 36px;
+            }
+
+            .pasto {
+                font-size: 16px;
+            }
+
+            .panel-login {
+                padding: 38px 32px;
+            }
+
+        }
+
+        /* CELULAR */
+
+        @media (max-width: 520px) {
+
+            .pagina {
+                padding: 0;
+            }
+
+            .contenedor-web {
+                min-height: 100vh;
+                box-shadow: none;
+            }
+
+            .panel-marca {
+                min-height: 300px;
+                padding: 35px 20px;
+            }
+
+            .logo {
+                width: 210px;
+                height: 145px;
             }
 
             .nombre {
                 font-size: 34px;
+            }
+
+            .pasto {
+                font-size: 15px;
+                letter-spacing: 11px;
+            }
+
+            .descripcion {
+                font-size: 13px;
+            }
+
+            .panel-login {
+                padding: 30px 22px 40px;
+            }
+
+            .formulario h1 {
+                font-size: 26px;
             }
 
         }
@@ -244,307 +332,182 @@
 
 </head>
 
-
 <body>
 
+<div class="pagina">
 
-    <div class="contenedor">
+    <div class="contenedor-web">
 
+        <!-- MARCA -->
 
-        <!-- LOGO CULTURAACTIVA -->
+        <section class="panel-marca">
 
-        <img
-            src="../imagen/usuario.png"
-            alt="CulturaActiva Pasto"
-            class="logo"
-        >
-
-
-        <!-- NOMBRE -->
-
-        <div class="nombre">
-
-            <span class="cultura">Cultura</span><span class="activa">Activa</span>
-
-        </div>
-
-
-        <!-- PASTO -->
-
-        <div class="pasto">
-
-            PASTO
-
-        </div>
-
-
-        <!-- FRASE -->
-
-        <p class="descripcion">
-
-            Conecta con la cultura, vive tu ciudad.
-
-        </p>
-
-
-        <!-- MENSAJE DE ERROR -->
-
-        <div id="mensaje"></div>
-
-
-        <!-- FORMULARIO LOGIN -->
-
-        <form
-            name="Login-Form"
-            action="signin.php"
-            method="POST"
-        >
-
-
-            <!-- CORREO -->
-
-            <div class="campo">
-
-                <label for="correo">
-
-                    Correo Electronico
-
-                </label>
-
-                <input
-                    type="email"
-                    id="correo"
-                    name="correo"
-                    autocomplete="email"
-                    required
-                >
-
-            </div>
-
-
-            <!-- CONTRASEÑA -->
-
-            <div class="campo">
-
-                <label for="contrasena">
-
-                    Contraseña
-
-                </label>
-
-                <input
-                    type="password"
-                    id="contrasena"
-                    name="contrasena"
-                    autocomplete="current-password"
-                    required
-                >
-
-            </div>
-
-
-            <!-- BOTÓN INICIAR SESIÓN -->
-
-            <button
-                type="submit"
-                class="btn-login"
+            <img
+                src="../imagen/usuario.png"
+                alt="CulturaActiva Pasto"
+                class="logo"
             >
 
-                Iniciar Sesión
+            <div class="nombre">
 
-            </button>
+                <span class="cultura">Cultura</span><span class="activa">Activa</span>
 
+            </div>
 
-        </form>
+            <div class="pasto">
+                PASTO
+            </div>
 
+            <p class="descripcion">
+                Conecta con la cultura, vive tu ciudad.
+            </p>
 
+        </section>
 
-        <!-- RECUPERAR CONTRASEÑA -->
+        <!-- LOGIN -->
 
-        <a
-            href="recuperar.html"
-            class="recuperar"
-        >
+        <section class="panel-login">
 
-            ¿Olvidaste tu contraseña?
+            <div class="formulario">
 
-        </a>
+                <h1>Iniciar sesión</h1>
 
+                <p class="subtitulo">
+                    Ingresa a CulturaActiva Pasto para continuar.
+                </p>
 
-        <!-- SEPARADOR -->
+                <div id="mensaje"></div>
 
-        <div class="separador">
+                <form
+                    name="Login-Form"
+                    action="signin.php"
+                    method="POST"
+                >
 
-            <div class="linea"></div>
+                    <div class="campo">
 
-            <div class="punto"></div>
+                        <label for="correo">
+                            Correo electrónico
+                        </label>
 
-            <div class="linea"></div>
+                        <input
+                            type="email"
+                            id="correo"
+                            name="correo"
+                            autocomplete="email"
+                            required
+                        >
 
-        </div>
+                    </div>
 
+                    <div class="campo">
 
-        <!-- REGISTRO -->
+                        <label for="contrasena">
+                            Contraseña
+                        </label>
 
-        <div class="registro">
+                        <input
+                            type="password"
+                            id="contrasena"
+                            name="contrasena"
+                            autocomplete="current-password"
+                            required
+                        >
 
-            <span>
+                    </div>
 
-                ¿No tienes cuenta?
+                    <button
+                        type="submit"
+                        class="btn-login"
+                    >
+                        Iniciar sesión
+                    </button>
 
-            </span>
+                </form>
 
-            <a href="registro.html">
+                <a
+                    href="recuperar.html"
+                    class="recuperar"
+                >
+                    ¿Olvidaste tu contraseña?
+                </a>
 
-                Registrarse
+                <div class="separador">
 
-            </a>
+                    <div class="linea"></div>
 
-        </div>
+                    <div class="punto"></div>
 
+                    <div class="linea"></div>
+
+                </div>
+
+                <div class="registro">
+
+                    <span>
+                        ¿No tienes cuenta?
+                    </span>
+
+                    <a href="registro.html">
+                        Registrarse
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
 
     </div>
 
+</div>
 
-    <!-- SUPABASE -->
+<script>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    const parametros =
+        new URLSearchParams(window.location.search);
 
+    const error =
+        parametros.get("error");
 
-    <script>
+    const mensaje =
+        document.getElementById("mensaje");
 
-        /*
-         * DATOS DE SUPABASE
-         *
-         * Reemplaza estos dos valores
-         * por los datos públicos de tu proyecto.
-         */
+    if (error) {
 
-        const SUPABASE_URL = "TU_URL_DE_SUPABASE";
+        let texto = "";
 
-        const SUPABASE_KEY = "TU_CLAVE_PUBLICA_DE_SUPABASE";
+        if (error === "usuario_no_encontrado") {
 
+            texto = "❌ Usuario no encontrado";
 
-        /*
-         * Crear conexión con Supabase
-         */
+        } else if (error === "contrasena_incorrecta") {
 
-        const supabaseClient = window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY
-        );
+            texto = "⚠️ Contraseña incorrecta";
 
+        } else if (error === "campos_vacios") {
 
-        /*
-         * INICIAR SESIÓN CON GOOGLE
-         */
+            texto = "⚠️ Complete todos los campos";
 
-        async function iniciarSesionGoogle() {
+        } else if (error === "conexion") {
 
-            try {
-
-                const { error } =
-                    await supabaseClient.auth.signInWithOAuth({
-
-                        provider: "google",
-
-                        options: {
-
-                            redirectTo:
-                                window.location.origin +
-                                "/trabajo-interstructurante-/pagina/principal.php"
-
-                        }
-
-                    });
-
-
-                if (error) {
-
-                    console.error(error);
-
-                    alert(
-                        "No se pudo iniciar sesión con Google."
-                    );
-
-                }
-
-            }
-
-            catch (error) {
-
-                console.error(error);
-
-                alert(
-                    "Ocurrió un error al iniciar sesión con Google."
-                );
-
-            }
+            texto =
+                "❌ Error de conexión con la base de datos";
 
         }
 
+        if (texto !== "") {
 
-        /*
-         * MENSAJES DEL PHP
-         */
-
-        const parametros =
-            new URLSearchParams(window.location.search);
-
-        const error =
-            parametros.get("error");
-
-        const mensaje =
-            document.getElementById("mensaje");
-
-
-        if (error) {
-
-            let texto = "";
-
-
-            if (error === "usuario_no_encontrado") {
-
-                texto = "❌ Usuario no encontrado";
-
-            }
-
-
-            else if (error === "contrasena_incorrecta") {
-
-                texto = "⚠️ Contraseña incorrecta";
-
-            }
-
-
-            else if (error === "campos_vacios") {
-
-                texto = "⚠️ Complete todos los campos";
-
-            }
-
-
-            else if (error === "conexion") {
-
-                texto =
-                    "❌ Error de conexión con la base de datos";
-
-            }
-
-
-            if (texto !== "") {
-
-                mensaje.innerHTML =
-                    '<div class="alerta">' +
-                    texto +
-                    '</div>';
-
-            }
+            mensaje.innerHTML =
+                '<div class="alerta">' +
+                texto +
+                '</div>';
 
         }
 
-    </script>
+    }
 
+</script>
 
 </body>
 

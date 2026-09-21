@@ -2,10 +2,40 @@
 
 session_start();
 
-// Verificar sesion
+require_once "../base de datos/database.php";
+
+// Verificar sesión
 if (!isset($_SESSION["id_usuario"])) {
     header("Location: signin.html");
     exit;
+}
+
+// Traer todos los eventos aceptados.
+// JavaScript mostrará únicamente los que estén guardados en favoritos.
+$sql = "SELECT
+            id_evento,
+            titulo,
+            descripcion,
+            fecha,
+            hora,
+            lugar,
+            imagen,
+            latitud,
+            longitud
+        FROM evento
+        WHERE estado = 'aceptado'
+        ORDER BY fecha ASC, hora ASC";
+
+$resultado = pg_query($conn_supa, $sql);
+
+if (!$resultado) {
+    die("Error al cargar los eventos.");
+}
+
+$eventos = [];
+
+while ($fila = pg_fetch_assoc($resultado)) {
+    $eventos[] = $fila;
 }
 
 ?>
@@ -32,538 +62,925 @@ if (!isset($_SESSION["id_usuario"])) {
             padding: 0;
         }
 
+        html,
         body {
+            margin: 0;
+            padding: 0;
             font-family: Arial, Helvetica, sans-serif;
             background: #eeeeee;
+            color: #222;
         }
 
-
-        /* Contenedor */
+        body {
+            min-height: 100vh;
+        }
 
         .app {
             width: 100%;
-            max-width: 430px;
             min-height: 100vh;
-            margin: auto;
-            background: #50006f;
-            padding-bottom: 70px;
+            background: #51006f;
+            padding-bottom: 72px;
         }
 
+        /* ENCABEZADO IGUAL AL PRINCIPAL */
 
-        /* Encabezado */
-
-        .header {
-            height: 126px;
-            background: white;
-            position: relative;
-            padding: 8px 15px;
+        header {
+            width: 100%;
+            height: 112px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding: 0 5vw;
+            gap: 28px;
         }
-
-
-        /* Logo */
 
         .logo {
-            width: 105px;
+            width: 145px;
             height: auto;
-            display: block;
-            margin-top: 2px;
+            flex-shrink: 0;
         }
 
-
-        /* Titulo */
-
         .titulo-app {
-            position: absolute;
-            left: 126px;
-            top: 10px;
-            color: #50006f;
+            color: #51006f;
+            line-height: 1.05;
+            min-width: 150px;
         }
 
         .nombre-app {
-            font-size: 23px;
-            font-weight: bold;
-            line-height: 25px;
+            font-size: 21px;
+            font-weight: 700;
         }
 
         .ciudad-app {
-            font-size: 16px;
-            font-weight: bold;
-            line-height: 18px;
+            font-size: 15px;
+            font-weight: 700;
+            margin-top: 2px;
         }
 
         .eslogan-app {
             font-size: 8px;
             color: #555;
-            margin-top: 2px;
+            margin-top: 4px;
         }
 
-
-        /* Perfil superior */
-
-        .perfil-superior {
-            position: absolute;
-            right: 18px;
-            top: 28px;
-            width: 22px;
-            height: 22px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
+        .buscador-wrap {
+            position: relative;
+            width: min(700px, 100%);
+            margin: 0 auto;
         }
-
-        .perfil-superior svg {
-            width: 100%;
-            height: 100%;
-            stroke: #333;
-            fill: none;
-            stroke-width: 1.5;
-        }
-
-
-        /* Buscador */
 
         .buscador {
-            position: absolute;
-            top: 77px;
-            left: 126px;
-            right: 15px;
-            height: 33px;
-            background: white;
-            border: 1px solid #222;
-            display: flex;
-            align-items: center;
+            display: block;
+            width: 100%;
+            height: 48px;
+            padding: 0 20px 0 48px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            background: #fff;
         }
 
         .icono-busqueda {
-            width: 30px;
-            height: 100%;
+            position: absolute;
+            left: 17px;
+            top: 13px;
+            width: 22px;
+            height: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 1;
         }
 
         .icono-busqueda svg {
-            width: 16px;
-            height: 16px;
-            stroke: #111;
-            fill: none;
-            stroke-width: 1.8;
-        }
-
-        .buscador input {
             width: 100%;
             height: 100%;
-            border: none;
-            outline: none;
-            font-size: 11px;
-            padding-right: 5px;
+            stroke: #555;
+            fill: none;
+            stroke-width: 1.7;
+            stroke-linecap: round;
         }
 
-
-        /* Contenido */
-
-        .contenido {
-            padding: 31px 10px 25px 10px;
-            color: white;
-        }
-
-        .titulo-seccion {
-            font-size: 14px;
-            font-weight: normal;
-            margin: 0 0 20px 9px;
-        }
-
-
-        /* Sin favoritos */
-
-        .sin-favoritos {
-            width: 100%;
-            min-height: 150px;
-            border: 1px dashed rgba(255, 255, 255, 0.6);
+        .perfil-superior {
+            color: #333;
+            text-decoration: none;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
+            margin-left: 8px;
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .perfil-superior svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        /* CONTENIDO */
+
+        .contenedor {
+            width: min(1180px, 92%);
+            margin: 0 auto;
+            padding: 35px 0 70px;
+        }
+
+        .hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 30px;
+            margin-bottom: 28px;
+        }
+
+        .hero h1 {
+            margin: 0;
+            color: #fff;
+            font-size: 32px;
+        }
+
+        .hero p {
+            margin: 7px 0 0;
+            color: #eadcf0;
+            font-size: 15px;
+        }
+
+        .publicar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            color: #4b1f78;
+            text-decoration: none;
+            padding: 11px 20px;
+            border-radius: 7px;
+            font-size: 14px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .titulo {
+            color: #fff;
+            font-size: 21px;
+            margin: 0 0 18px;
+        }
+
+        .lista {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 22px;
+        }
+
+        .evento-favorito {
+            display: none;
+            background: #fff;
+            color: #222;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, .16);
+            min-width: 0;
+            flex-direction: column;
+        }
+
+        .evento-favorito.visible {
+            display: flex;
+        }
+
+        .evento-imagen,
+        .sin-imagen {
+            width: 100%;
+            height: 205px;
+            object-fit: cover;
+        }
+
+        .sin-imagen {
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+            font-size: 13px;
+        }
+
+        .evento-info {
+            padding: 0 17px 17px;
+            color: #333;
+        }
+
+        .evento-titulo {
+            color: #fff;
+            padding: 12px 14px;
+            margin: 0 -17px 10px;
+            background: #f04444;
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .evento-favorito:nth-child(2n) .evento-titulo {
+            background: #f28b20;
+        }
+
+        .evento-favorito:nth-child(3n) .evento-titulo {
+            background: #35bd58;
+        }
+
+        .evento-dato {
+            font-size: 13px;
+            padding: 5px 0;
+            color: #444;
+        }
+
+        .evento-descripcion {
+            font-size: 13px;
+            padding: 5px 0;
+            color: #555;
+            line-height: 1.45;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .acciones {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .boton-mapa,
+        .quitar-favorito {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            padding: 7px 10px;
+            font-size: 11px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .boton-mapa {
+            color: #4b1f78;
+            background: #fff;
+            border: 1px solid #4b1f78;
+        }
+
+        .quitar-favorito {
+            margin: 0;
+            border: 0;
+            background: #d62828;
+            color: #fff;
+        }
+
+        .sin-favoritos {
+            display: flex;
+            width: 100%;
+            min-height: 180px;
+            border: 1px dashed rgba(255, 255, 255, .6);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
             text-align: center;
-            padding: 20px;
+            padding: 30px;
+            color: #fff;
         }
 
         .sin-favoritos svg {
-            width: 42px;
-            height: 42px;
-            margin-bottom: 12px;
-            stroke: white;
+            width: 48px;
+            height: 48px;
+            margin-bottom: 14px;
+            stroke: #fff;
             fill: none;
             stroke-width: 1.5;
         }
 
         .sin-favoritos p {
-            font-size: 13px;
-            margin-bottom: 5px;
+            font-size: 15px;
+            margin-bottom: 6px;
         }
 
         .sin-favoritos small {
-            font-size: 10px;
-            color: #dddddd;
+            font-size: 12px;
+            color: #ddd;
         }
 
+        .sin-resultados {
+            display: none;
+            background: #fff;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            color: #555;
+            margin-top: 10px;
+        }
 
-        /* Menu inferior */
+        /* NAVEGACIÓN INFERIOR IGUAL AL PRINCIPAL */
 
-        .menu-inferior {
+        .nav {
             position: fixed;
+            left: 0;
             bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
             width: 100%;
-            max-width: 430px;
-            height: 69px;
-            background: white;
-            border-top: 1px solid #ddd;
+            height: 72px;
+            background: #fff;
             display: flex;
-            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            gap: 55px;
+            border-top: 1px solid #ddd;
+            padding: 0 20px;
+            z-index: 1000;
         }
 
-        .menu-item {
-            flex: 1;
-            border: none;
-            background: white;
+        .nav a {
+            min-width: 75px;
+            height: 72px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 3px;
-            color: #111;
-            font-size: 9px;
+            color: #333;
+            text-decoration: none;
+            font-size: 11px;
             cursor: pointer;
         }
 
-        .menu-item svg {
-            width: 21px;
-            height: 21px;
-            stroke: #222;
+        .nav a:hover,
+        .activo {
+            color: #4b1f78 !important;
+        }
+
+        .icono {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icono svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
             fill: none;
             stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
-        .menu-item.activo {
-            color: #4d0870;
-            font-weight: bold;
+        /* RESPONSIVE */
+
+        @media (max-width: 900px) {
+
+            .lista {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            header {
+                padding: 0 3%;
+                gap: 18px;
+            }
+
+            .logo {
+                width: 120px;
+            }
+
+            .titulo-app {
+                min-width: 125px;
+            }
+
+            .nombre-app {
+                font-size: 18px;
+            }
+
+            .ciudad-app {
+                font-size: 13px;
+            }
+
+            .eslogan-app {
+                font-size: 7px;
+            }
+
+            .nav {
+                gap: 25px;
+            }
+
         }
 
-        .menu-item.activo svg {
-            fill: #4d0870;
-            stroke: #4d0870;
+        @media (max-width: 650px) {
+
+            header {
+                height: auto;
+                min-height: 150px;
+                flex-wrap: wrap;
+                padding: 14px 20px;
+                gap: 10px;
+            }
+
+            .logo {
+                width: 105px;
+            }
+
+            .titulo-app {
+                min-width: 0;
+                flex: 1;
+            }
+
+            .nombre-app {
+                font-size: 18px;
+            }
+
+            .ciudad-app {
+                font-size: 13px;
+            }
+
+            .eslogan-app {
+                font-size: 7px;
+            }
+
+            header .buscador-wrap {
+                order: 5;
+                flex-basis: 100%;
+                width: 100%;
+            }
+
+            .contenedor {
+                padding-top: 28px;
+            }
+
+            .hero {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .hero h1 {
+                font-size: 26px;
+            }
+
+            .lista {
+                grid-template-columns: 1fr;
+            }
+
+            .nav {
+                gap: 4px;
+                padding: 0 5px;
+            }
+
+            .nav a {
+                min-width: 55px;
+                font-size: 10px;
+            }
+
         }
 
     </style>
 
 </head>
 
-
 <body>
 
 <div class="app">
 
-
-    <!-- Encabezado -->
-
-    <header class="header">
-
-
-        <!-- Logo -->
+    <header>
 
         <img
             src="../imagen/usuario.png"
-            alt="CulturaActiva Pasto"
             class="logo"
+            alt="CulturaActiva Pasto"
         >
 
-
-        <!-- Nombre -->
-
         <div class="titulo-app">
-
-            <div class="nombre-app">
-                CulturaActiva
-            </div>
-
-            <div class="ciudad-app">
-                PASTO
-            </div>
-
+            <div class="nombre-app">CulturaActiva</div>
+            <div class="ciudad-app">PASTO</div>
             <div class="eslogan-app">
                 Conecta con la cultura, vive tu ciudad.
             </div>
-
         </div>
 
+        <div class="buscador-wrap">
 
-        <!-- Perfil -->
-
-        <button
-            class="perfil-superior"
-            onclick="irPerfil()"
-        >
-
-            <svg viewBox="0 0 24 24">
-
-                <circle
-                    cx="12"
-                    cy="12"
-                    r="9"
-                ></circle>
-
-                <circle
-                    cx="12"
-                    cy="9"
-                    r="3"
-                ></circle>
-
-                <path
-                    d="M6.5 19c1.5-3 9.5-3 11 0"
-                ></path>
-
-            </svg>
-
-        </button>
-
-
-        <!-- Buscador -->
-
-        <div class="buscador">
-
-            <div class="icono-busqueda">
+            <span class="icono-busqueda">
 
                 <svg viewBox="0 0 24 24">
-
-                    <circle
-                        cx="10.5"
-                        cy="10.5"
-                        r="6.5"
-                    ></circle>
-
-                    <line
-                        x1="15.5"
-                        y1="15.5"
-                        x2="21"
-                        y2="21"
-                    ></line>
-
+                    <circle cx="10.8" cy="10.8" r="6.5"></circle>
+                    <path d="M16 16l5 5"></path>
                 </svg>
 
-            </div>
+            </span>
 
             <input
                 type="text"
                 id="busqueda"
+                class="buscador"
                 placeholder="Buscar eventos, artistas, lugares..."
             >
 
         </div>
 
-    </header>
+        <a
+            href="perfil.php"
+            class="perfil-superior"
+            aria-label="Perfil"
+        >
 
-
-    <!-- Contenido -->
-
-    <main class="contenido">
-
-
-        <!-- Titulo -->
-
-        <h2 class="titulo-seccion">
-            MIS FAVORITOS
-        </h2>
-
-
-        <!-- Sin favoritos -->
-
-        <div class="sin-favoritos">
-
-            <svg viewBox="0 0 24 24">
-
-                <path
-                    d="M20.8 8.8c0 5.5-8.8 11-8.8 11S3.2 14.3 3.2 8.8A4.8 4.8 0 0 1 8 4c1.7 0 3.2 0.9 4 2.2C12.8 4.9 14.3 4 16 4a4.8 4.8 0 0 1 4.8 4.8z"
-                ></path>
-
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <circle cx="12" cy="8" r="3"></circle>
+                <path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"></path>
+                <circle cx="12" cy="12" r="10"></circle>
             </svg>
 
-            <p>
-                No tienes eventos favoritos.
-            </p>
+        </a>
 
-            <small>
-                Cuando marques un evento como favorito aparecerá aquí.
-            </small>
+    </header>
 
-        </div>
+    <main class="contenedor">
+
+        <section class="hero">
+
+            <div>
+                <h1>Mis favoritos</h1>
+                <p>Los eventos que guardaste para no perderte.</p>
+            </div>
+
+        </section>
+
+        <?php if (count($eventos) > 0): ?>
+
+            <div id="listaFavoritos" class="lista">
+
+                <?php foreach ($eventos as $evento): ?>
+
+                    <article
+                        class="evento-favorito"
+                        data-id="<?php echo (int)$evento["id_evento"]; ?>"
+                        data-busqueda="<?php
+                            echo htmlspecialchars(
+                                strtolower(
+                                    $evento["titulo"] . " " .
+                                    ($evento["descripcion"] ?? "") . " " .
+                                    $evento["lugar"]
+                                )
+                            );
+                        ?>"
+                    >
+
+                        <?php if (!empty($evento["imagen"])): ?>
+
+                            <img
+                                src="<?php echo htmlspecialchars($evento["imagen"]); ?>"
+                                class="evento-imagen"
+                                alt="<?php echo htmlspecialchars($evento["titulo"]); ?>"
+                            >
+
+                        <?php else: ?>
+
+                            <div class="sin-imagen">
+                                Sin imagen
+                            </div>
+
+                        <?php endif; ?>
+
+                        <div class="evento-info">
+
+                            <div class="evento-titulo">
+                                <?php echo htmlspecialchars($evento["titulo"]); ?>
+                            </div>
+
+                            <div class="evento-dato">
+                                <strong>Fecha:</strong>
+                                <?php echo htmlspecialchars($evento["fecha"]); ?>
+                            </div>
+
+                            <div class="evento-dato">
+                                <strong>Hora:</strong>
+                                <?php echo htmlspecialchars(substr($evento["hora"], 0, 5)); ?>
+                            </div>
+
+                            <div class="evento-dato">
+                                <strong>Lugar:</strong>
+                                <?php echo htmlspecialchars($evento["lugar"]); ?>
+                            </div>
+
+                            <div class="evento-descripcion">
+                                <?php
+                                    echo htmlspecialchars(
+                                        $evento["descripcion"] ?? "Sin descripción."
+                                    );
+                                ?>
+                            </div>
+
+                            <div class="acciones">
+
+                                <?php if (
+                                    $evento["latitud"] !== null &&
+                                    $evento["longitud"] !== null
+                                ): ?>
+
+                                    <a
+                                        href="mapa.php?evento=<?php echo (int)$evento["id_evento"]; ?>"
+                                        class="boton-mapa"
+                                    >
+                                        Ver ubicación
+                                    </a>
+
+                                <?php endif; ?>
+
+                                <button
+                                    type="button"
+                                    class="quitar-favorito"
+                                    data-quitar="<?php echo (int)$evento["id_evento"]; ?>"
+                                >
+                                    Quitar favorito
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                <?php endforeach; ?>
+
+            </div>
+
+            <div id="sinFavoritos" class="sin-favoritos">
+
+                <svg viewBox="0 0 24 24">
+                    <path d="M20.8 8.8c0 5.5-8.8 11-8.8 11S3.2 14.3 3.2 8.8A4.8 4.8 0 0 1 8 4c1.7 0 3.2.9 4 2.2C12.8 4.9 14.3 4 16 4a4.8 4.8 0 0 1 4.8 4.8z"></path>
+                </svg>
+
+                <p>
+                    No tienes eventos favoritos.
+                </p>
+
+                <small>
+                    Cuando marques un evento como favorito aparecerá aquí.
+                </small>
+
+            </div>
+
+            <div id="sinResultados" class="sin-resultados">
+                No se encontraron favoritos con esa búsqueda.
+            </div>
+
+        <?php else: ?>
+
+            <div class="sin-favoritos">
+
+                <svg viewBox="0 0 24 24">
+                    <path d="M20.8 8.8c0 5.5-8.8 11-8.8 11S3.2 14.3 3.2 8.8A4.8 4.8 0 0 1 8 4c1.7 0 3.2.9 4 2.2C12.8 4.9 14.3 4 16 4a4.8 4.8 0 0 1 4.8 4.8z"></path>
+                </svg>
+
+                <p>
+                    No hay eventos aceptados todavía.
+                </p>
+
+                <small>
+                    Los eventos que marques como favoritos aparecerán aquí.
+                </small>
+
+            </div>
+
+        <?php endif; ?>
 
     </main>
 
+    <nav class="nav">
 
-    <!-- Menu inferior -->
+        <a href="principal.php">
 
-    <nav class="menu-inferior">
+            <span class="icono">
 
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 10.5L12 3l9 7.5"></path>
+                    <path d="M5 9.5V21h14V9.5"></path>
+                    <path d="M9 21v-7h6v7"></path>
+                </svg>
 
-        <!-- Inicio -->
+            </span>
 
-        <button
-            class="menu-item"
-            onclick="irInicio()"
-        >
+            Inicio
 
-            <svg viewBox="0 0 24 24">
+        </a>
 
-                <path
-                    d="M3 10.5L12 3l9 7.5v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"
-                ></path>
+        <a href="favoritos.php" class="activo">
 
-            </svg>
+            <span class="icono">
 
-            <span>Inicio</span>
+                <svg viewBox="0 0 24 24">
+                    <path d="M20.8 8.8c0 5.5-8.8 11-8.8 11S3.2 8.8 3.2 8.8C3.2 5.6 5.3 3.5 8.2 3.5c1.7 0 3.1.8 3.8 2.1.7-1.3 2.1-2.1 3.8-2.1 2.9 0 5 2.1 5 5.3z"></path>
+                </svg>
 
-        </button>
+            </span>
 
+            Favoritos
 
-        <!-- Favoritos -->
+        </a>
 
-        <button
-            class="menu-item activo"
-        >
+        <a href="mapa.php">
 
-            <svg viewBox="0 0 24 24">
+            <span class="icono">
 
-                <path
-                    d="M20.8 8.8c0 5.5-8.8 11-8.8 11S3.2 14.3 3.2 8.8A4.8 4.8 0 0 1 8 4c1.7 0 3.2 0.9 4 2.2C12.8 4.9 14.3 4 16 4a4.8 4.8 0 0 1 4.8 4.8z"
-                ></path>
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"></path>
+                    <circle cx="12" cy="9" r="2.5"></circle>
+                </svg>
 
-            </svg>
+            </span>
 
-            <span>Favoritos</span>
+            Mapa
 
-        </button>
+        </a>
 
+        <a href="notificaciones.php">
 
-        <!-- Mapa -->
+            <span class="icono">
 
-        <button
-            class="menu-item"
-            onclick="irMapa()"
-        >
+                <svg viewBox="0 0 24 24">
+                    <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                    <path d="M10 21h4"></path>
+                </svg>
 
-            <svg viewBox="0 0 24 24">
+            </span>
 
-                <path
-                    d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"
-                ></path>
+            Notificaciones
 
-                <circle
-                    cx="12"
-                    cy="9"
-                    r="2"
-                ></circle>
+        </a>
 
-            </svg>
+        <a href="perfil.php">
 
-            <span>Mapa</span>
+            <span class="icono">
 
-        </button>
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="8" r="3.2"></circle>
+                    <path d="M5 21c0-3.8 3-6 7-6s7 2.2 7 6"></path>
+                </svg>
 
+            </span>
 
-        <!-- Notificaciones -->
+            Perfil
 
-        <button
-            class="menu-item"
-            onclick="irNotificaciones()"
-        >
-
-            <svg viewBox="0 0 24 24">
-
-                <path
-                    d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"
-                ></path>
-
-                <path
-                    d="M10 21h4"
-                ></path>
-
-            </svg>
-
-            <span>Notificaciones</span>
-
-        </button>
-
-
-        <!-- Perfil -->
-
-        <button
-            class="menu-item"
-            onclick="irPerfil()"
-        >
-
-            <svg viewBox="0 0 24 24">
-
-                <circle
-                    cx="12"
-                    cy="8"
-                    r="4"
-                ></circle>
-
-                <path
-                    d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"
-                ></path>
-
-            </svg>
-
-            <span>Perfil</span>
-
-        </button>
+        </a>
 
     </nav>
 
 </div>
 
-
 <script>
 
-    // Inicio
+    const CLAVE_FAVORITOS = "culturaactiva_favoritos";
 
-    function irInicio() {
-        window.location.href = "principal.php";
+    const buscador = document.getElementById("busqueda");
+
+    function obtenerFavoritos() {
+
+        try {
+
+            const datos = JSON.parse(
+                localStorage.getItem(CLAVE_FAVORITOS) || "[]"
+            );
+
+            return Array.isArray(datos)
+                ? datos.map(String)
+                : [];
+
+        } catch (error) {
+
+            return [];
+
+        }
+
     }
 
+    function guardarFavoritos(favoritos) {
 
-    // Favoritos
+        localStorage.setItem(
+            CLAVE_FAVORITOS,
+            JSON.stringify(favoritos)
+        );
 
-    function irFavoritos() {
-        window.location.href = "favoritos.php";
     }
 
+    function actualizarFavoritos() {
 
-    // Mapa
+        const favoritos = obtenerFavoritos();
 
-    function irMapa() {
-        window.location.href = "mapa.php";
+        const tarjetas = document.querySelectorAll(".evento-favorito");
+
+        const texto = buscador
+            ? buscador.value.toLowerCase().trim()
+            : "";
+
+        let visibles = 0;
+        let coincidencias = 0;
+
+        tarjetas.forEach(function(tarjeta) {
+
+            const id = String(tarjeta.dataset.id);
+
+            const contenido =
+                (tarjeta.dataset.busqueda || "").toLowerCase();
+
+            const esFavorito = favoritos.includes(id);
+
+            const coincide = contenido.includes(texto);
+
+            if (esFavorito) {
+
+                visibles++;
+
+                if (coincide) {
+
+                    tarjeta.classList.add("visible");
+                    coincidencias++;
+
+                } else {
+
+                    tarjeta.classList.remove("visible");
+
+                }
+
+            } else {
+
+                tarjeta.classList.remove("visible");
+
+            }
+
+        });
+
+        const sinFavoritos =
+            document.getElementById("sinFavoritos");
+
+        const sinResultados =
+            document.getElementById("sinResultados");
+
+        if (sinFavoritos) {
+
+            sinFavoritos.style.display =
+                visibles === 0 && texto === ""
+                    ? "flex"
+                    : "none";
+
+        }
+
+        if (sinResultados) {
+
+            sinResultados.style.display =
+                texto !== "" &&
+                favoritos.length > 0 &&
+                coincidencias === 0
+                    ? "block"
+                    : "none";
+
+        }
+
     }
 
+    document
+        .querySelectorAll(".quitar-favorito")
+        .forEach(function(boton) {
 
-    // Notificaciones
+            boton.addEventListener("click", function() {
 
-    function irNotificaciones() {
-        window.location.href = "notificaciones.php";
+                const id = String(this.dataset.quitar);
+
+                let favoritos = obtenerFavoritos();
+
+                favoritos = favoritos.filter(function(item) {
+                    return item !== id;
+                });
+
+                guardarFavoritos(favoritos);
+
+                actualizarFavoritos();
+
+            });
+
+        });
+
+    if (buscador) {
+
+        buscador.addEventListener("input", actualizarFavoritos);
+
     }
 
-
-    // Perfil
-
-    function irPerfil() {
-        window.location.href = "perfil.php";
-    }
+    actualizarFavoritos();
 
 </script>
-
 
 </body>
 

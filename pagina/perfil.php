@@ -68,180 +68,183 @@ $es_admin = ($rol === "admin");
     padding: 0;
 }
 
+html,
 body {
+    margin: 0;
+    padding: 0;
     font-family: Arial, Helvetica, sans-serif;
     background: #eeeeee;
+    color: #222;
+}
+
+body {
+    min-height: 100vh;
 }
 
 .app {
     width: 100%;
-    max-width: 430px;
     min-height: 100vh;
-    margin: auto;
-    background: #50006f;
-    padding-bottom: 70px;
+    background: #51006f;
+    padding-bottom: 72px;
 }
 
+/* ENCABEZADO IGUAL AL PRINCIPAL */
 
-/* ENCABEZADO */
-
-.header {
-    height: 126px;
-    background: white;
-    position: relative;
-    padding: 8px 15px;
+header {
+    width: 100%;
+    height: 112px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding: 0 5vw;
+    gap: 28px;
 }
 
 .logo {
-    width: 105px;
+    width: 145px;
     height: auto;
-    display: block;
-    margin-top: 2px;
+    flex-shrink: 0;
 }
 
 .titulo-app {
-    position: absolute;
-    left: 126px;
-    top: 10px;
-    color: #50006f;
+    color: #51006f;
+    line-height: 1.05;
+    min-width: 150px;
 }
 
 .nombre-app {
-    font-size: 23px;
-    font-weight: bold;
-    line-height: 25px;
+    font-size: 21px;
+    font-weight: 700;
 }
 
 .ciudad-app {
-    font-size: 16px;
-    font-weight: bold;
-    line-height: 18px;
+    font-size: 15px;
+    font-weight: 700;
+    margin-top: 2px;
 }
 
 .eslogan-app {
     font-size: 8px;
     color: #555;
-    margin-top: 2px;
+    margin-top: 4px;
 }
 
-
-/* PERFIL SUPERIOR */
-
 .perfil-superior {
-    position: absolute;
-    right: 18px;
-    top: 28px;
-    width: 22px;
-    height: 22px;
-    border: none;
+    color: #333;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    border: 0;
     background: transparent;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .perfil-superior svg {
-    width: 100%;
-    height: 100%;
-    stroke: #333;
-    fill: none;
-    stroke-width: 1.5;
+    width: 28px;
+    height: 28px;
 }
 
+/* CONTENIDO */
 
-/* BUSCADOR */
+.contenedor {
+    width: min(900px, 92%);
+    margin: 0 auto;
+    padding: 35px 0 50px;
+}
 
-.buscador {
-    position: absolute;
-    top: 77px;
-    left: 126px;
-    right: 15px;
-    height: 33px;
-    background: white;
-    border: 1px solid #222;
+.hero {
+    margin-bottom: 25px;
+}
+
+.hero h1 {
+    margin: 0;
+    color: #fff;
+    font-size: 32px;
+}
+
+.hero p {
+    margin: 7px 0 0;
+    color: #eadcf0;
+    font-size: 15px;
+}
+
+/* TARJETA DE PERFIL */
+
+.perfil-panel {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, .16);
+    overflow: hidden;
+}
+
+.perfil-cabecera {
+    background: #4b1f78;
+    color: #fff;
+    padding: 24px;
     display: flex;
     align-items: center;
-}
-
-.icono-busqueda {
-    width: 30px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.icono-busqueda svg {
-    width: 16px;
-    height: 16px;
-    stroke: #111;
-    fill: none;
-    stroke-width: 1.8;
-}
-
-.buscador input {
-    width: 100%;
-    height: 100%;
-    border: none;
-    outline: none;
-    font-size: 11px;
-    padding-right: 5px;
-}
-
-
-/* PERFIL */
-
-.contenido {
-    padding: 31px 10px 25px 10px;
-    color: white;
-}
-
-.titulo-seccion {
-    font-size: 14px;
-    font-weight: normal;
-    margin: 0 0 20px 9px;
+    gap: 18px;
 }
 
 .usuario-icono {
-    width: 85px;
-    height: 85px;
-    border: 2px solid white;
+    width: 82px;
+    height: 82px;
+    min-width: 82px;
+    border: 2px solid #fff;
     border-radius: 50%;
-    margin: 0 auto 18px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
-    font-size: 46px;
 }
 
-.titulo-perfil {
-    text-align: center;
-    font-size: 25px;
-    font-weight: normal;
-    margin-bottom: 30px;
+.usuario-icono svg {
+    width: 48px;
+    height: 48px;
+    stroke: #fff;
+    fill: none;
+    stroke-width: 1.4;
 }
 
+.perfil-cabecera-info h2 {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
 
-/* TARJETA */
+.perfil-cabecera-info p {
+    font-size: 13px;
+    color: #eadcf0;
+}
 
-.tarjeta {
-    background: white;
-    border-radius: 9px;
-    text-align: left;
-    padding: 22px;
-    color: #222;
+.datos-perfil {
+    padding: 25px;
+}
+
+.fila-dato {
+    border-bottom: 1px solid #eee;
+    padding: 0 0 16px;
+    margin-bottom: 18px;
+}
+
+.fila-dato:last-child {
+    border-bottom: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 
 .etiqueta {
     color: #777;
-    font-size: 14px;
-    margin-bottom: 5px;
+    font-size: 13px;
+    margin-bottom: 6px;
 }
 
 .valor {
     color: #222;
     font-size: 16px;
-    margin-bottom: 20px;
+    word-break: break-word;
 }
 
 .rol-admin {
@@ -249,94 +252,208 @@ body {
     font-weight: bold;
 }
 
+.acciones-perfil {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 18px;
+}
 
-/* ADMINISTRAR */
+.accion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    border-radius: 7px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 14px;
+    text-align: center;
+}
 
 .admin {
-    display: block;
-    width: 100%;
-    background: white;
+    background: #fff;
     color: #50006f;
-    text-decoration: none;
-    text-align: center;
-    padding: 13px;
-    border-radius: 7px;
-    margin-top: 17px;
-    font-size: 14px;
-    font-weight: bold;
+    border: 2px solid #50006f;
 }
-
-
-/* CERRAR SESIÓN */
 
 .cerrar {
-    display: block;
-    width: 100%;
     background: #e32626;
-    color: white;
-    text-decoration: none;
-    text-align: center;
-    padding: 15px;
-    border-radius: 8px;
-    margin-top: 17px;
-    font-size: 16px;
+    color: #fff;
 }
 
+/* NAVEGACIÓN INFERIOR IGUAL AL PRINCIPAL */
 
-/* MENU INFERIOR */
-
-.menu-inferior {
+.nav {
     position: fixed;
+    left: 0;
     bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-
     width: 100%;
-    max-width: 430px;
-    height: 69px;
-
-    background: white;
-    border-top: 1px solid #ddd;
-
+    height: 72px;
+    background: #fff;
     display: flex;
-
-    z-index: 100;
+    justify-content: center;
+    align-items: center;
+    gap: 55px;
+    border-top: 1px solid #ddd;
+    padding: 0 20px;
+    z-index: 1000;
 }
 
-.menu-item {
-    flex: 1;
-    border: none;
-    background: white;
-
+.nav a {
+    min-width: 75px;
+    height: 72px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
-    gap: 3px;
-
-    color: #111;
-    font-size: 9px;
-
+    color: #333;
+    text-decoration: none;
+    font-size: 11px;
     cursor: pointer;
 }
 
-.menu-item svg {
-    width: 21px;
-    height: 21px;
-    stroke: #222;
+.nav a:hover,
+.activo {
+    color: #4b1f78 !important;
+}
+
+.icono {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icono svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
     fill: none;
     stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
-.menu-item.activo {
-    color: #4d0870;
-    font-weight: bold;
+@media (max-width: 900px) {
+
+    header {
+        padding: 0 3%;
+        gap: 18px;
+    }
+
+    .logo {
+        width: 120px;
+    }
+
+    .titulo-app {
+        min-width: 125px;
+    }
+
+    .nombre-app {
+        font-size: 18px;
+    }
+
+    .ciudad-app {
+        font-size: 13px;
+    }
+
+    .eslogan-app {
+        font-size: 7px;
+    }
+
+    .nav {
+        gap: 25px;
+    }
+
 }
 
-.menu-item.activo svg {
-    fill: #4d0870;
-    stroke: #4d0870;
+@media (max-width: 650px) {
+
+    header {
+        height: 100px;
+        padding: 12px 20px;
+        gap: 12px;
+    }
+
+    .logo {
+        width: 95px;
+    }
+
+    .titulo-app {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .nombre-app {
+        font-size: 17px;
+    }
+
+    .ciudad-app {
+        font-size: 12px;
+    }
+
+    .eslogan-app {
+        font-size: 6px;
+    }
+
+    .perfil-superior {
+        margin-left: 0;
+    }
+
+    .contenedor {
+        width: 92%;
+        padding-top: 28px;
+    }
+
+    .hero h1 {
+        font-size: 26px;
+    }
+
+    .perfil-cabecera {
+        padding: 18px;
+    }
+
+    .usuario-icono {
+        width: 68px;
+        height: 68px;
+        min-width: 68px;
+    }
+
+    .usuario-icono svg {
+        width: 40px;
+        height: 40px;
+    }
+
+    .perfil-cabecera-info h2 {
+        font-size: 20px;
+    }
+
+    .perfil-cabecera-info p {
+        font-size: 11px;
+    }
+
+    .datos-perfil {
+        padding: 20px;
+    }
+
+    .acciones-perfil {
+        grid-template-columns: 1fr;
+    }
+
+    .nav {
+        gap: 4px;
+        padding: 0 5px;
+    }
+
+    .nav a {
+        min-width: 55px;
+        font-size: 10px;
+    }
+
 }
 
 </style>
@@ -347,335 +464,268 @@ body {
 
 <div class="app">
 
+<header>
 
-<header class="header">
+    <img
+        src="../imagen/usuario.png"
+        class="logo"
+        alt="CulturaActiva Pasto"
+    >
 
+    <div class="titulo-app">
 
-<img
-    src="../imagen/usuario.png"
-    alt="CulturaActiva Pasto"
-    class="logo"
->
+        <div class="nombre-app">
+            CulturaActiva
+        </div>
 
+        <div class="ciudad-app">
+            PASTO
+        </div>
 
-<div class="titulo-app">
+        <div class="eslogan-app">
+            Conecta con la cultura, vive tu ciudad.
+        </div>
 
-<div class="nombre-app">
-    CulturaActiva
-</div>
+    </div>
 
-<div class="ciudad-app">
-    PASTO
-</div>
+    <a
+        href="perfil.php"
+        class="perfil-superior"
+        aria-label="Perfil"
+    >
 
-<div class="eslogan-app">
-    Conecta con la cultura, vive tu ciudad.
-</div>
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+            <circle cx="12" cy="8" r="3"></circle>
+            <path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"></path>
+            <circle cx="12" cy="12" r="10"></circle>
+        </svg>
 
-</div>
-
-
-<!-- ICONO PERFIL -->
-
-<button
-    class="perfil-superior"
-    onclick="irPerfil()"
->
-
-<svg viewBox="0 0 24 24">
-
-<circle
-    cx="12"
-    cy="12"
-    r="9"
-></circle>
-
-<circle
-    cx="12"
-    cy="9"
-    r="3"
-></circle>
-
-<path
-    d="M6.5 19c1.5-3 9.5-3 11 0"
-></path>
-
-</svg>
-
-</button>
-
-
-<!-- BUSCADOR -->
-
-<div class="buscador">
-
-<div class="icono-busqueda">
-
-<svg viewBox="0 0 24 24">
-
-<circle
-    cx="10.5"
-    cy="10.5"
-    r="6.5"
-></circle>
-
-<line
-    x1="15.5"
-    y1="15.5"
-    x2="21"
-    y2="21"
-></line>
-
-</svg>
-
-</div>
-
-<input
-    type="text"
-    placeholder="Buscar eventos, artistas, lugares..."
->
-
-</div>
+    </a>
 
 </header>
 
+<main class="contenedor">
 
-<main class="contenido">
+    <section class="hero">
 
+        <h1>Mi perfil</h1>
 
-<div class="usuario-icono">
-    ♙
-</div>
+        <p>
+            Consulta la información de tu cuenta en CulturaActiva.
+        </p>
 
+    </section>
 
-<h1 class="titulo-perfil">
-    Mi perfil
-</h1>
+    <section class="perfil-panel">
 
+        <div class="perfil-cabecera">
 
-<div class="tarjeta">
+            <div class="usuario-icono">
 
-<div class="etiqueta">
-    Nombre
-</div>
+                <svg viewBox="0 0 24 24">
 
-<div class="valor">
+                    <circle
+                        cx="12"
+                        cy="8"
+                        r="4"
+                    ></circle>
 
-<?php
-echo htmlspecialchars($usuario["nombre"]);
-?>
+                    <path
+                        d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"
+                    ></path>
 
-</div>
+                </svg>
 
+            </div>
 
-<div class="etiqueta">
-    Correo electrónico
-</div>
+            <div class="perfil-cabecera-info">
 
-<div class="valor">
+                <h2>
+                    <?php echo htmlspecialchars($usuario["nombre"]); ?>
+                </h2>
 
-<?php
-echo htmlspecialchars($usuario["correo"]);
-?>
+                <p>
+                    <?php echo $es_admin
+                        ? "Cuenta de administrador"
+                        : "Cuenta de usuario";
+                    ?>
+                </p>
 
-</div>
+            </div>
 
+        </div>
 
-<div class="etiqueta">
-    Tipo de cuenta
-</div>
+        <div class="datos-perfil">
 
-<div class="valor">
+            <div class="fila-dato">
 
-<?php
+                <div class="etiqueta">
+                    Nombre
+                </div>
 
-if ($es_admin) {
+                <div class="valor">
+                    <?php
+                        echo htmlspecialchars($usuario["nombre"]);
+                    ?>
+                </div>
 
-    echo '<span class="rol-admin">Administrador</span>';
+            </div>
 
-} else {
+            <div class="fila-dato">
 
-    echo "Usuario";
+                <div class="etiqueta">
+                    Correo electrónico
+                </div>
 
-}
+                <div class="valor">
+                    <?php
+                        echo htmlspecialchars($usuario["correo"]);
+                    ?>
+                </div>
 
-?>
+            </div>
 
-</div>
+            <div class="fila-dato">
 
-</div>
+                <div class="etiqueta">
+                    Tipo de cuenta
+                </div>
 
+                <div class="valor">
 
-<?php if ($es_admin): ?>
+                    <?php
 
-<a
-    href="administrador.php"
-    class="admin"
->
-    ⚙ Administrar eventos
-</a>
+                    if ($es_admin) {
 
-<?php endif; ?>
+                        echo '<span class="rol-admin">Administrador</span>';
 
+                    } else {
 
-<a
-    href="cerrar_sesion.php"
-    class="cerrar"
->
-    Cerrar sesión
-</a>
+                        echo "Usuario";
 
+                    }
+
+                    ?>
+
+                </div>
+
+            </div>
+
+            <div class="acciones-perfil">
+
+                <?php if ($es_admin): ?>
+
+                    <a
+                        href="administrador.php"
+                        class="accion admin"
+                    >
+                        ⚙ Administrar eventos
+                    </a>
+
+                <?php endif; ?>
+
+                <a
+                    href="cerrar_sesion.php"
+                    class="accion cerrar"
+                >
+                    Cerrar sesión
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
 
 </main>
 
+<nav class="nav">
 
-<!-- MENU INFERIOR -->
+    <a href="principal.php">
 
-<nav class="menu-inferior">
+        <span class="icono">
 
+            <svg viewBox="0 0 24 24">
+                <path d="M3 10.5L12 3l9 7.5"></path>
+                <path d="M5 9.5V21h14V9.5"></path>
+                <path d="M9 21v-7h6v7"></path>
+            </svg>
 
-<!-- INICIO -->
+        </span>
 
-<button
-    class="menu-item"
-    onclick="irInicio()"
->
+        Inicio
 
-<svg viewBox="0 0 24 24">
+    </a>
 
-<path
-    d="M3 10.5L12 3l9 7.5v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"
-></path>
+    <a href="favoritos.php">
 
-</svg>
+        <span class="icono">
 
-<span>Inicio</span>
+            <svg viewBox="0 0 24 24">
+                <path d="M20.8 8.8c0 5.5-8.8 11-8.8 11S3.2 14.3 3.2 8.8C3.2 5.6 5.3 3.5 8.2 3.5c1.7 0 3.1.8 3.8 2.1.7-1.3 2.1-2.1 3.8-2.1 2.9 0 5 2.1 5 5.3z"></path>
+            </svg>
 
-</button>
+        </span>
 
+        Favoritos
 
-<!-- FAVORITOS -->
+    </a>
 
-<button
-    class="menu-item"
-    onclick="irFavoritos()"
->
+    <a href="mapa.php">
 
-<svg viewBox="0 0 24 24">
+        <span class="icono">
 
-<path
-    d="M20.8 8.8c0 5.5-8.8 11-8.8 11S3.2 14.3 3.2 8.8A4.8 4.8 0 0 1 8 4c1.7 0 3.2 0.9 4 2.2C12.8 4.9 14.3 4 16 4a4.8 4.8 0 0 1 4.8 4.8z"
-></path>
+            <svg viewBox="0 0 24 24">
+                <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"></path>
+                <circle cx="12" cy="9" r="2.5"></circle>
+            </svg>
 
-</svg>
+        </span>
 
-<span>Favoritos</span>
+        Mapa
 
-</button>
+    </a>
 
+    <a href="notificaciones.php">
 
-<!-- MAPA -->
+        <span class="icono">
 
-<button
-    class="menu-item"
-    onclick="irMapa()"
->
+            <svg viewBox="0 0 24 24">
+                <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                <path d="M10 21h4"></path>
+            </svg>
 
-<svg viewBox="0 0 24 24">
+        </span>
 
-<path
-    d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"
-></path>
+        Notificaciones
 
-<circle
-    cx="12"
-    cy="9"
-    r="2"
-></circle>
+    </a>
 
-</svg>
+    <a href="perfil.php" class="activo">
 
-<span>Mapa</span>
+        <span class="icono">
 
-</button>
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="3.2"></circle>
+                <path d="M5 21c0-3.8 3-6 7-6s7 2.2 7 6"></path>
+            </svg>
 
+        </span>
 
-<!-- NOTIFICACIONES -->
+        Perfil
 
-<button
-    class="menu-item"
-    onclick="irNotificaciones()"
->
-
-<svg viewBox="0 0 24 24">
-
-<path
-    d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"
-></path>
-
-<path
-    d="M10 21h4"
-></path>
-
-</svg>
-
-<span>Notificaciones</span>
-
-</button>
-
-
-<!-- PERFIL -->
-
-<button
-    class="menu-item activo"
->
-
-<svg viewBox="0 0 24 24">
-
-<circle
-    cx="12"
-    cy="8"
-    r="4"
-></circle>
-
-<path
-    d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"
-></path>
-
-</svg>
-
-<span>Perfil</span>
-
-</button>
+    </a>
 
 </nav>
 
 </div>
-
-
-<script>
-
-function irInicio() {
-    window.location.href = "principal.php";
-}
-
-function irFavoritos() {
-    window.location.href = "favoritos.php";
-}
-
-function irMapa() {
-    window.location.href = "mapa.php";
-}
-
-function irNotificaciones() {
-    window.location.href = "notificaciones.php";
-}
-
-function irPerfil() {
-    window.location.href = "perfil.php";
-}
-
-</script>
 
 </body>
 

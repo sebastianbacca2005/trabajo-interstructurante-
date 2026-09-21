@@ -2,10 +2,57 @@
 
 session_start();
 
-// Verificar sesion
+require_once "../base de datos/database.php";
+
+// Verificar sesión
 if (!isset($_SESSION["id_usuario"])) {
     header("Location: signin.html");
     exit;
+}
+
+// Evento que se desea marcar
+$id_evento_seleccionado = isset($_GET["evento"])
+    ? (int) $_GET["evento"]
+    : 0;
+
+// Traer todos los eventos aceptados para mostrar sus marcadores
+$sql = "SELECT
+            id_evento,
+            id_usuario,
+            titulo,
+            descripcion,
+            fecha,
+            hora,
+            lugar,
+            imagen,
+            latitud,
+            longitud
+        FROM evento
+        WHERE estado = 'aceptado'
+          AND latitud IS NOT NULL
+          AND longitud IS NOT NULL
+        ORDER BY fecha ASC, hora ASC";
+
+$resultado = pg_query($conn_supa, $sql);
+
+if (!$resultado) {
+    die("Error al cargar los eventos.");
+}
+
+$eventos = [];
+
+while ($fila = pg_fetch_assoc($resultado)) {
+    $eventos[] = $fila;
+}
+
+// Evento seleccionado para la tarjeta inferior
+$evento_seleccionado = null;
+
+foreach ($eventos as $evento) {
+    if ((int)$evento["id_evento"] === $id_evento_seleccionado) {
+        $evento_seleccionado = $evento;
+        break;
+    }
 }
 
 ?>
@@ -24,9 +71,6 @@ if (!isset($_SESSION["id_usuario"])) {
 
     <title>Mapa - CulturaActiva</title>
 
-
-    <!-- Leaflet -->
-
     <link
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -40,301 +84,476 @@ if (!isset($_SESSION["id_usuario"])) {
             padding: 0;
         }
 
+        html,
         body {
+            margin: 0;
+            padding: 0;
             font-family: Arial, Helvetica, sans-serif;
             background: #eeeeee;
+            color: #222;
         }
 
-
-        /* Contenedor */
+        body {
+            min-height: 100vh;
+        }
 
         .app {
             width: 100%;
-            max-width: 430px;
             min-height: 100vh;
-            margin: auto;
-            background: #50006f;
-            padding-bottom: 70px;
+            background: #51006f;
+            padding-bottom: 72px;
         }
 
+        /* ENCABEZADO IGUAL AL PRINCIPAL */
 
-        /* Encabezado */
-
-        .header {
-            height: 126px;
-            background: white;
-            position: relative;
-            padding: 8px 15px;
+        header {
+            width: 100%;
+            height: 112px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding: 0 5vw;
+            gap: 28px;
         }
-
-
-        /* Logo */
 
         .logo {
-            width: 105px;
+            width: 145px;
             height: auto;
-            display: block;
-            margin-top: 2px;
+            flex-shrink: 0;
         }
 
-
-        /* Titulo */
-
         .titulo-app {
-            position: absolute;
-            left: 126px;
-            top: 10px;
-            color: #50006f;
+            color: #51006f;
+            line-height: 1.05;
+            min-width: 150px;
         }
 
         .nombre-app {
-            font-size: 23px;
-            font-weight: bold;
-            line-height: 25px;
+            font-size: 21px;
+            font-weight: 700;
         }
 
         .ciudad-app {
-            font-size: 16px;
-            font-weight: bold;
-            line-height: 18px;
+            font-size: 15px;
+            font-weight: 700;
+            margin-top: 2px;
         }
 
         .eslogan-app {
             font-size: 8px;
             color: #555;
-            margin-top: 2px;
+            margin-top: 4px;
         }
 
-
-        /* Perfil */
-
-        .perfil-superior {
-            position: absolute;
-            right: 18px;
-            top: 28px;
-            width: 22px;
-            height: 22px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
+        .buscador-wrap {
+            position: relative;
+            width: min(700px, 100%);
+            margin: 0 auto;
         }
-
-        .perfil-superior svg {
-            width: 100%;
-            height: 100%;
-            stroke: #333;
-            fill: none;
-            stroke-width: 1.5;
-        }
-
-
-        /* Buscador */
 
         .buscador {
-            position: absolute;
-            top: 77px;
-            left: 126px;
-            right: 15px;
-            height: 33px;
-            background: white;
-            border: 1px solid #222;
-            display: flex;
-            align-items: center;
+            display: block;
+            width: 100%;
+            height: 48px;
+            padding: 0 20px 0 48px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            background: #fff;
         }
 
         .icono-busqueda {
-            width: 30px;
-            height: 100%;
+            position: absolute;
+            left: 17px;
+            top: 13px;
+            width: 22px;
+            height: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 1;
         }
 
         .icono-busqueda svg {
-            width: 16px;
-            height: 16px;
-            stroke: #111;
-            fill: none;
-            stroke-width: 1.8;
-        }
-
-        .buscador input {
             width: 100%;
             height: 100%;
-            border: none;
-            outline: none;
-            font-size: 11px;
-            padding-right: 5px;
+            stroke: #555;
+            fill: none;
+            stroke-width: 1.7;
+            stroke-linecap: round;
         }
 
-
-        /* Contenido */
-
-        .contenido {
-            padding: 22px 10px 15px 10px;
-            color: white;
-        }
-
-
-        /* Mapa */
-
-        #mapa {
-            width: 100%;
-            height: 420px;
-            border: none;
-        }
-
-
-        /* Tarjeta del evento */
-
-        .evento {
-            width: 100%;
-            min-height: 110px;
-            display: flex;
-            margin-top: 10px;
-            background: #50006f;
-        }
-
-
-        .evento-imagen {
-            width: 130px;
-            min-width: 130px;
-            height: 110px;
-            background: #6d2788;
+        .perfil-superior {
+            color: #333;
+            text-decoration: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 11px;
-            text-align: center;
-        }
-
-
-        .evento-info {
-            flex: 1;
-            padding-left: 8px;
-        }
-
-
-        .evento-titulo {
-            min-height: 28px;
-            background: #ff4054;
-            display: flex;
-            align-items: center;
-            padding: 5px 8px;
-            font-size: 13px;
-            margin-bottom: 5px;
-        }
-
-
-        .evento-dato {
-            display: flex;
-            align-items: center;
-            min-height: 30px;
-            font-size: 11px;
-        }
-
-
-        .evento-dato svg {
-            width: 17px;
-            height: 17px;
-            margin-right: 7px;
-            stroke: white;
-            fill: none;
-            stroke-width: 1.5;
+            margin-left: 8px;
+            border: 0;
+            background: transparent;
+            cursor: pointer;
             flex-shrink: 0;
         }
 
+        .perfil-superior svg {
+            width: 28px;
+            height: 28px;
+        }
 
-        /* Sin eventos */
+        /* CONTENIDO */
 
-        .sin-eventos {
+        .contenedor {
+            width: min(1180px, 92%);
+            margin: 0 auto;
+            padding: 35px 0 50px;
+        }
+
+        .hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 30px;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            margin: 0;
+            color: #fff;
+            font-size: 32px;
+        }
+
+        .hero p {
+            margin: 7px 0 0;
+            color: #eadcf0;
+            font-size: 15px;
+        }
+
+        /* MAPA */
+
+        .mapa-contenedor {
             width: 100%;
-            min-height: 90px;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, .16);
+        }
+
+        #mapa {
+            width: 100%;
+            height: 500px;
+        }
+
+        /* EVENTO MARCADO */
+
+        .evento-marcado {
+            margin-top: 22px;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, .16);
+        }
+
+        .evento-marcado-cabecera {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 13px 18px;
+            color: #fff;
+            background: #f04444;
+        }
+
+        .evento-marcado-cabecera h2 {
+            font-size: 19px;
+            margin: 0;
+        }
+
+        .marcado {
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        .evento-marcado-contenido {
+            display: flex;
+            gap: 0;
+            min-height: 170px;
+        }
+
+        .evento-marcado-imagen {
+            width: 220px;
+            min-width: 220px;
+            height: 170px;
+            object-fit: cover;
+            background: #ddd;
+        }
+
+        .evento-marcado-sin-imagen {
+            width: 220px;
+            min-width: 220px;
+            height: 170px;
+            background: #ddd;
             display: flex;
             align-items: center;
             justify-content: center;
-            text-align: center;
-            border: 1px dashed rgba(255,255,255,0.5);
-            font-size: 12px;
-            padding: 15px;
-            margin-top: 10px;
+            color: #777;
+            font-size: 13px;
         }
 
-
-        /* Menu */
-
-        .menu-inferior {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 430px;
-            height: 69px;
-            background: white;
-            border-top: 1px solid #ddd;
-            display: flex;
-            z-index: 100;
-        }
-
-        .menu-item {
+        .evento-marcado-info {
+            padding: 18px 20px;
+            color: #333;
             flex: 1;
-            border: none;
-            background: white;
+        }
+
+        .evento-marcado-dato {
+            font-size: 14px;
+            margin: 0 0 9px;
+            color: #444;
+        }
+
+        .evento-marcado-dato strong {
+            color: #4b1f78;
+        }
+
+        .evento-marcado-descripcion {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #555;
+            margin-top: 13px;
+        }
+
+        .boton-ruta {
+            display: inline-flex;
+            margin-top: 15px;
+            background: #4b1f78;
+            color: #fff;
+            text-decoration: none;
+            padding: 9px 13px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .sin-evento-seleccionado {
+            margin-top: 22px;
+            padding: 30px;
+            border: 1px dashed rgba(255,255,255,.6);
+            text-align: center;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        /* NAVEGACIÓN INFERIOR IGUAL AL PRINCIPAL */
+
+        .nav {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 72px;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 55px;
+            border-top: 1px solid #ddd;
+            padding: 0 20px;
+            z-index: 1000;
+        }
+
+        .nav a {
+            min-width: 75px;
+            height: 72px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 3px;
-            color: #111;
-            font-size: 9px;
+            color: #333;
+            text-decoration: none;
+            font-size: 11px;
             cursor: pointer;
         }
 
-        .menu-item svg {
-            width: 21px;
-            height: 21px;
-            stroke: #222;
+        .nav a:hover,
+        .activo {
+            color: #4b1f78 !important;
+        }
+
+        .icono {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icono svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
             fill: none;
             stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
-        .menu-item.activo {
-            color: #4d0870;
-            font-weight: bold;
+        .popup-evento {
+            font-family: Arial, Helvetica, sans-serif;
+            min-width: 180px;
         }
 
-        .menu-item.activo svg {
-            fill: #4d0870;
-            stroke: #4d0870;
+        .popup-evento strong {
+            color: #4b1f78;
+        }
+
+        .popup-evento small {
+            display: block;
+            margin-top: 4px;
+            color: #555;
+        }
+
+        @media (max-width: 900px) {
+
+            header {
+                padding: 0 3%;
+                gap: 18px;
+            }
+
+            .logo {
+                width: 120px;
+            }
+
+            .titulo-app {
+                min-width: 125px;
+            }
+
+            .nombre-app {
+                font-size: 18px;
+            }
+
+            .ciudad-app {
+                font-size: 13px;
+            }
+
+            .eslogan-app {
+                font-size: 7px;
+            }
+
+            .nav {
+                gap: 25px;
+            }
+
+            .evento-marcado-imagen,
+            .evento-marcado-sin-imagen {
+                width: 190px;
+                min-width: 190px;
+            }
+
+        }
+
+        @media (max-width: 650px) {
+
+            header {
+                height: auto;
+                min-height: 150px;
+                flex-wrap: wrap;
+                padding: 14px 20px;
+                gap: 10px;
+            }
+
+            .logo {
+                width: 105px;
+            }
+
+            .titulo-app {
+                min-width: 0;
+                flex: 1;
+            }
+
+            .nombre-app {
+                font-size: 18px;
+            }
+
+            .ciudad-app {
+                font-size: 13px;
+            }
+
+            .eslogan-app {
+                font-size: 7px;
+            }
+
+            header .buscador-wrap {
+                order: 5;
+                flex-basis: 100%;
+                width: 100%;
+            }
+
+            .contenedor {
+                width: 92%;
+                padding-top: 28px;
+            }
+
+            .hero {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .hero h1 {
+                font-size: 26px;
+            }
+
+            #mapa {
+                height: 420px;
+            }
+
+            .evento-marcado-contenido {
+                flex-direction: column;
+            }
+
+            .evento-marcado-imagen,
+            .evento-marcado-sin-imagen {
+                width: 100%;
+                min-width: 0;
+                height: 210px;
+            }
+
+            .evento-marcado-info {
+                padding: 17px;
+            }
+
+            .nav {
+                gap: 4px;
+                padding: 0 5px;
+            }
+
+            .nav a {
+                min-width: 55px;
+                font-size: 10px;
+            }
+
         }
 
     </style>
 
 </head>
 
-
 <body>
 
 <div class="app">
 
+    <!-- ENCABEZADO -->
 
-    <!-- Encabezado -->
-
-    <header class="header">
-
-
-        <!-- Logo -->
+    <header>
 
         <img
             src="../imagen/usuario.png"
-            alt="CulturaActiva Pasto"
             class="logo"
+            alt="CulturaActiva Pasto"
         >
-
-
-        <!-- Nombre -->
 
         <div class="titulo-app">
 
@@ -352,235 +571,265 @@ if (!isset($_SESSION["id_usuario"])) {
 
         </div>
 
+        <div class="buscador-wrap">
 
-        <!-- Perfil -->
-
-        <button
-            class="perfil-superior"
-            onclick="irPerfil()"
-        >
-
-            <svg viewBox="0 0 24 24">
-
-                <circle
-                    cx="12"
-                    cy="12"
-                    r="9"
-                ></circle>
-
-                <circle
-                    cx="12"
-                    cy="9"
-                    r="3"
-                ></circle>
-
-                <path
-                    d="M6.5 19c1.5-3 9.5-3 11 0"
-                ></path>
-
-            </svg>
-
-        </button>
-
-
-        <!-- Buscador -->
-
-        <div class="buscador">
-
-            <div class="icono-busqueda">
+            <span class="icono-busqueda">
 
                 <svg viewBox="0 0 24 24">
-
-                    <circle
-                        cx="10.5"
-                        cy="10.5"
-                        r="6.5"
-                    ></circle>
-
-                    <line
-                        x1="15.5"
-                        y1="15.5"
-                        x2="21"
-                        y2="21"
-                    ></line>
-
+                    <circle cx="10.8" cy="10.8" r="6.5"></circle>
+                    <path d="M16 16l5 5"></path>
                 </svg>
 
-            </div>
+            </span>
 
             <input
                 type="text"
+                id="buscador"
+                class="buscador"
                 placeholder="Buscar eventos, artistas, lugares..."
             >
 
         </div>
 
+        <a
+            href="perfil.php"
+            class="perfil-superior"
+            aria-label="Perfil"
+        >
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <circle cx="12" cy="8" r="3"></circle>
+                <path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"></path>
+                <circle cx="12" cy="12" r="10"></circle>
+            </svg>
+
+        </a>
+
     </header>
 
+    <!-- CONTENIDO -->
 
-    <!-- Contenido -->
+    <main class="contenedor">
 
-    <main class="contenido">
+        <section class="hero">
 
+            <div>
+                <h1>Mapa de eventos</h1>
+                <p>Encuentra la ubicación de los eventos culturales en Pasto.</p>
+            </div>
 
-        <!-- Mapa real de Pasto -->
+        </section>
 
-        <div id="mapa"></div>
+        <div class="mapa-contenedor">
 
-
-        <!-- Evento -->
-
-        <div class="sin-eventos">
-
-            Los eventos aparecerán aquí cuando sean registrados.
+            <div id="mapa"></div>
 
         </div>
 
+        <?php if ($evento_seleccionado): ?>
+
+            <section class="evento-marcado" id="eventoMarcado">
+
+                <div class="evento-marcado-cabecera">
+
+                    <h2>
+                        <?php echo htmlspecialchars($evento_seleccionado["titulo"]); ?>
+                    </h2>
+
+                    <span class="marcado">
+                        ● Evento marcado
+                    </span>
+
+                </div>
+
+                <div class="evento-marcado-contenido">
+
+                    <?php if (!empty($evento_seleccionado["imagen"])): ?>
+
+                        <img
+                            src="<?php echo htmlspecialchars($evento_seleccionado["imagen"]); ?>"
+                            class="evento-marcado-imagen"
+                            alt="<?php echo htmlspecialchars($evento_seleccionado["titulo"]); ?>"
+                        >
+
+                    <?php else: ?>
+
+                        <div class="evento-marcado-sin-imagen">
+                            Sin imagen
+                        </div>
+
+                    <?php endif; ?>
+
+                    <div class="evento-marcado-info">
+
+                        <div class="evento-marcado-dato">
+                            <strong>Dirección:</strong>
+                            <?php echo htmlspecialchars($evento_seleccionado["lugar"] ?: "No registrada"); ?>
+                        </div>
+
+                        <div class="evento-marcado-dato">
+                            <strong>Fecha:</strong>
+                            <?php echo htmlspecialchars($evento_seleccionado["fecha"]); ?>
+                        </div>
+
+                        <div class="evento-marcado-dato">
+                            <strong>Hora:</strong>
+                            <?php echo htmlspecialchars(substr($evento_seleccionado["hora"], 0, 5)); ?>
+                        </div>
+
+                        <div class="evento-marcado-descripcion">
+                            <?php
+                                echo htmlspecialchars(
+                                    $evento_seleccionado["descripcion"] ?: "Sin descripción."
+                                );
+                            ?>
+                        </div>
+
+                        <a
+                            class="boton-ruta"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href="https://www.google.com/maps/dir/?api=1&destination=<?php
+                                echo urlencode(
+                                    $evento_seleccionado["latitud"] . "," .
+                                    $evento_seleccionado["longitud"]
+                                );
+                            ?>"
+                        >
+                            Cómo llegar
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        <?php else: ?>
+
+            <div class="sin-evento-seleccionado">
+                Selecciona un marcador en el mapa para ver el evento y su dirección aquí.
+            </div>
+
+        <?php endif; ?>
+
     </main>
 
+    <!-- NAVEGACIÓN -->
 
-    <!-- Menu inferior -->
+    <nav class="nav">
 
-    <nav class="menu-inferior">
+        <a href="principal.php">
 
+            <span class="icono">
 
-        <!-- Inicio -->
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 10.5L12 3l9 7.5"></path>
+                    <path d="M5 9.5V21h14V9.5"></path>
+                    <path d="M9 21v-7h6v7"></path>
+                </svg>
 
-        <button
-            class="menu-item"
-            onclick="irInicio()"
-        >
+            </span>
 
-            <svg viewBox="0 0 24 24">
+            Inicio
 
-                <path
-                    d="M3 10.5L12 3l9 7.5v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"
-                ></path>
+        </a>
 
-            </svg>
+        <a href="favoritos.php">
 
-            <span>Inicio</span>
+            <span class="icono">
 
-        </button>
+                <svg viewBox="0 0 24 24">
+                    <path d="M20.8 8.8c0 5.5-8.8 11-8.8 11S3.2 14.3 3.2 8.8C3.2 5.6 5.3 3.5 8.2 3.5c1.7 0 3.1.8 3.8 2.1.7-1.3 2.1-2.1 3.8-2.1 2.9 0 5 2.1 5 5.3z"></path>
+                </svg>
 
+            </span>
 
-        <!-- Favoritos -->
+            Favoritos
 
-        <button
-            class="menu-item"
-            onclick="irFavoritos()"
-        >
+        </a>
 
-            <svg viewBox="0 0 24 24">
+        <a href="mapa.php" class="activo">
 
-                <path
-                    d="M20.8 8.8c0 5.5-8.8 11-8.8 11S3.2 14.3 3.2 8.8A4.8 4.8 0 0 1 8 4c1.7 0 3.2.9 4 2.2C12.8 4.9 14.3 4 16 4a4.8 4.8 0 0 1 4.8 4.8z"
-                ></path>
+            <span class="icono">
 
-            </svg>
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"></path>
+                    <circle cx="12" cy="9" r="2.5"></circle>
+                </svg>
 
-            <span>Favoritos</span>
+            </span>
 
-        </button>
+            Mapa
 
+        </a>
 
-        <!-- Mapa -->
+        <a href="notificaciones.php">
 
-        <button
-            class="menu-item activo"
-        >
+            <span class="icono">
 
-            <svg viewBox="0 0 24 24">
+                <svg viewBox="0 0 24 24">
+                    <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                    <path d="M10 21h4"></path>
+                </svg>
 
-                <path
-                    d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"
-                ></path>
+            </span>
 
-                <circle
-                    cx="12"
-                    cy="9"
-                    r="2"
-                ></circle>
+            Notificaciones
 
-            </svg>
+        </a>
 
-            <span>Mapa</span>
+        <a href="perfil.php">
 
-        </button>
+            <span class="icono">
 
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="8" r="3.2"></circle>
+                    <path d="M5 21c0-3.8 3-6 7-6s7 2.2 7 6"></path>
+                </svg>
 
-        <!-- Notificaciones -->
+            </span>
 
-        <button
-            class="menu-item"
-            onclick="irNotificaciones()"
-        >
+            Perfil
 
-            <svg viewBox="0 0 24 24">
-
-                <path
-                    d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"
-                ></path>
-
-                <path
-                    d="M10 21h4"
-                ></path>
-
-            </svg>
-
-            <span>Notificaciones</span>
-
-        </button>
-
-
-        <!-- Perfil -->
-
-        <button
-            class="menu-item"
-            onclick="irPerfil()"
-        >
-
-            <svg viewBox="0 0 24 24">
-
-                <circle
-                    cx="12"
-                    cy="8"
-                    r="4"
-                ></circle>
-
-                <path
-                    d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"
-                ></path>
-
-            </svg>
-
-            <span>Perfil</span>
-
-        </button>
+        </a>
 
     </nav>
 
 </div>
 
-
-<!-- Leaflet -->
-
 <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
 ></script>
 
-
 <script>
 
-    // Crear mapa centrado en Pasto
+    const eventos = <?php echo json_encode(
+        $eventos,
+        JSON_UNESCAPED_UNICODE |
+        JSON_UNESCAPED_SLASHES |
+        JSON_HEX_TAG |
+        JSON_HEX_AMP |
+        JSON_HEX_APOS |
+        JSON_HEX_QUOT
+    ); ?>;
 
+    const eventoSeleccionado = <?php echo json_encode(
+        $id_evento_seleccionado
+    ); ?>;
+
+    // Crear mapa centrado en Pasto
     const mapa = L.map("mapa").setView(
         [1.2136, -77.2811],
         13
     );
-
-
-    // Cargar mapa
 
     L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -590,47 +839,171 @@ if (!isset($_SESSION["id_usuario"])) {
         }
     ).addTo(mapa);
 
+    const marcadores = {};
 
-    // Marcador de Pasto
+    eventos.forEach(function(evento) {
 
-    L.marker(
-        [1.2136, -77.2811]
-    )
-    .addTo(mapa)
-    .bindPopup(
-        "<b>Pasto, Nariño</b>"
-    );
+        const lat = parseFloat(evento.latitud);
+        const lng = parseFloat(evento.longitud);
 
+        if (Number.isNaN(lat) || Number.isNaN(lng)) {
+            return;
+        }
 
-    // Inicio
+        const popup = `
+            <div class="popup-evento">
+                <strong>${escapeHtml(evento.titulo || "Evento")}</strong>
+                <small>${escapeHtml(evento.lugar || "Dirección no registrada")}</small>
+                <small>${escapeHtml(evento.fecha || "")} · ${escapeHtml((evento.hora || "").substring(0, 5))}</small>
+                <small>
+                    <a href="mapa.php?evento=${encodeURIComponent(evento.id_evento)}">
+                        Ver evento
+                    </a>
+                </small>
+            </div>
+        `;
 
-    function irInicio() {
-        window.location.href = "principal.php";
+        const marcador = L.marker([lat, lng])
+            .addTo(mapa)
+            .bindPopup(popup);
+
+        marcadores[String(evento.id_evento)] = marcador;
+
+        marcador.on("click", function() {
+            mostrarEventoSeleccionado(evento);
+        });
+
+    });
+
+    function mostrarEventoSeleccionado(evento) {
+
+        const panel = document.getElementById("eventoMarcado");
+
+        if (!panel) {
+            return;
+        }
+
+        panel.querySelector(".evento-marcado-cabecera h2").textContent =
+            evento.titulo || "Evento";
+
+        const imagen = panel.querySelector(".evento-marcado-imagen");
+        const sinImagen = panel.querySelector(".evento-marcado-sin-imagen");
+
+        if (imagen) {
+            if (evento.imagen) {
+                imagen.src = evento.imagen;
+                imagen.alt = evento.titulo || "Evento";
+                imagen.style.display = "block";
+            } else {
+                imagen.style.display = "none";
+            }
+        }
+
+        if (sinImagen) {
+            sinImagen.style.display = evento.imagen ? "none" : "flex";
+        }
+
+        const datos = panel.querySelectorAll(".evento-marcado-dato");
+
+        if (datos[0]) {
+            datos[0].innerHTML =
+                "<strong>Dirección:</strong> " +
+                escapeHtml(evento.lugar || "No registrada");
+        }
+
+        if (datos[1]) {
+            datos[1].innerHTML =
+                "<strong>Fecha:</strong> " +
+                escapeHtml(evento.fecha || "");
+        }
+
+        if (datos[2]) {
+            datos[2].innerHTML =
+                "<strong>Hora:</strong> " +
+                escapeHtml((evento.hora || "").substring(0, 5));
+        }
+
+        const descripcion =
+            panel.querySelector(".evento-marcado-descripcion");
+
+        if (descripcion) {
+            descripcion.textContent =
+                evento.descripcion || "Sin descripción.";
+        }
+
+        const botonRuta =
+            panel.querySelector(".boton-ruta");
+
+        if (botonRuta) {
+            botonRuta.href =
+                "https://www.google.com/maps/dir/?api=1&destination=" +
+                encodeURIComponent(
+                    evento.latitud + "," + evento.longitud
+                );
+        }
+
+        panel.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
     }
 
+    function escapeHtml(valor) {
 
-    // Favoritos
+        return String(valor)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
 
-    function irFavoritos() {
-        window.location.href = "favoritos.php";
     }
 
+    // Marcar y centrar automáticamente el evento enviado por GET
+    if (
+        eventoSeleccionado &&
+        marcadores[String(eventoSeleccionado)]
+    ) {
 
-    // Notificaciones
+        const marcadorSeleccionado =
+            marcadores[String(eventoSeleccionado)];
 
-    function irNotificaciones() {
-        window.location.href = "notificaciones.php";
+        marcadorSeleccionado.openPopup();
+
+        mapa.setView(
+            marcadorSeleccionado.getLatLng(),
+            16,
+            {
+                animate: true
+            }
+        );
+
     }
 
+    // Buscador: al escribir, ir al principal con la búsqueda.
+    const buscador = document.getElementById("buscador");
 
-    // Perfil
+    if (buscador) {
 
-    function irPerfil() {
-        window.location.href = "perfil.php";
+        buscador.addEventListener("keydown", function(e) {
+
+            if (e.key === "Enter") {
+
+                const texto = this.value.trim();
+
+                if (texto !== "") {
+                    window.location.href =
+                        "principal.php?busqueda=" +
+                        encodeURIComponent(texto);
+                }
+
+            }
+
+        });
+
     }
 
 </script>
-
 
 </body>
 
